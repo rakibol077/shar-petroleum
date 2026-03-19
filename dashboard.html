@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shar Petroleum - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .sidebar-item:hover { background-color: #f3f4f6; border-radius: 8px; }
+        .active-menu { background-color: #f0f7ff; color: #1e40af; border-radius: 8px; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col md:flex-row min-h-screen">
+
+    <aside class="w-full md:w-72 bg-white shadow-xl border-r border-gray-100 flex-shrink-0">
+        <div class="p-6 flex flex-col items-center border-b border-gray-50">
+            <img src="https://arpetrolna.comtechsolutionbd.com/assets/images/logo.png" alt="Logo" class="w-20 mb-2">
+            <h1 class="text-blue-900 font-black text-sm uppercase tracking-tighter">Shar Petroleum</h1>
+        </div>
+
+        <nav class="p-4 space-y-1 overflow-y-auto max-h-[80vh]">
+            <div class="sidebar-item active-menu p-3 flex items-center space-x-3 cursor-pointer">
+                <i class="fas fa-th-large"></i> <span>Dashboard</span>
+            </div>
+            <div class="sidebar-item p-3 flex items-center justify-between cursor-pointer text-gray-600">
+                <div class="flex items-center space-x-3"><i class="fas fa-edit"></i> <span>Master Data Entry</span></div>
+            </div>
+            <div class="sidebar-item p-3 flex items-center justify-between cursor-pointer text-gray-600">
+                <div class="flex items-center space-x-3"><i class="fas fa-file-invoice"></i> <span>Tax Invoice</span></div>
+            </div>
+            <div class="sidebar-item p-3 flex items-center justify-between cursor-pointer text-gray-600">
+                <div class="flex items-center space-x-3"><i class="fas fa-gas-pump"></i> <span>Station Report</span></div>
+                <i class="fas fa-chevron-right text-xs"></i>
+            </div>
+            <div class="sidebar-item p-3 flex items-center justify-between cursor-pointer text-gray-600">
+                <div class="flex items-center space-x-3"><i class="fas fa-chart-line"></i> <span>Vat Report</span></div>
+                <i class="fas fa-chevron-right text-xs"></i>
+            </div>
+            <div class="sidebar-item p-3 flex items-center space-x-3 cursor-pointer text-gray-600">
+                <i class="fas fa-users"></i> <span>Users</span>
+            </div>
+            
+            <div class="mt-10 pt-4 border-t">
+                <div onclick="window.location.href='index.html'" class="sidebar-item p-3 flex items-center space-x-3 cursor-pointer text-red-500 font-bold">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1">
+        <header class="bg-white p-4 shadow-sm flex justify-between items-center px-8">
+            <h2 class="font-bold text-gray-700">Admin Control Panel</h2>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-bell text-gray-400"></i>
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">R</div>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-gray-400 text-xs font-bold uppercase">Total Sales</p>
+                    <h3 class="text-2xl font-black text-blue-900 mt-1">SAR 45,230</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-gray-400 text-xs font-bold uppercase">Active Stations</p>
+                    <h3 class="text-2xl font-black text-green-600 mt-1">08</h3>
+                </div>
+            </div>
+
+            <div class="bg-blue-900 text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-3xl font-bold">Welcome, Rakibul!</h2>
+                    <p class="mt-2 text-blue-200">Shar Petroleum ম্যানেজমেন্ট সিস্টেমে আপনাকে স্বাগতম। এখান থেকে আপনি সব রিপোর্ট নিয়ন্ত্রণ করতে পারবেন।</p>
+                    <button class="mt-6 bg-[#00adef] hover:bg-white hover:text-blue-900 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg">
+                        View Detailed Report
+                    </button>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-800 rounded-full opacity-50"></div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
