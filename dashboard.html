@@ -3,257 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Management Cloud</title>
+    <title>Shar Petroleum - Executive Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .print-only { display: block !important; }
+            .shadow-sm, .shadow-2xl { shadow: none !important; border: 1px solid #eee; }
+        }
+        .print-only { display: none; }
+    </style>
 </head>
-<body class="bg-slate-50 flex h-screen overflow-hidden text-slate-800">
+<body class="bg-slate-50 min-h-screen">
 
-    <aside class="w-64 bg-white border-r flex flex-col no-print shadow-sm">
-        <div class="p-8 border-b flex items-center space-x-3">
-            <i class="fas fa-droplet text-blue-600 text-3xl"></i>
+    <main class="p-6 md:p-12">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 no-print">
             <div>
-                <h1 class="text-blue-900 font-black text-xs uppercase leading-none">Shar Petroleum</h1>
-                <span id="roleBadge" class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1 inline-block italic">Checking...</span>
-            </div>
-        </div>
-        <nav class="flex-1 p-5">
-            <div class="bg-blue-600 text-white p-4 rounded-2xl text-xs font-black uppercase shadow-lg shadow-blue-100">
-                <i class="fas fa-chart-line mr-2"></i> Analytics Dashboard
-            </div>
-        </nav>
-        <div class="p-6 border-t">
-            <button onclick="logout()" class="w-full p-4 text-red-500 font-black text-[10px] uppercase border border-red-50 hover:bg-red-50 rounded-2xl transition">
-                <i class="fas fa-sign-out-alt mr-2"></i> Logout
-            </button>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col overflow-y-auto">
-        <header class="bg-white h-20 border-b flex items-center justify-between px-10 no-print sticky top-0 z-10">
-            <div class="flex items-center space-x-4">
-                <div class="relative">
-                    <i class="fas fa-search absolute left-4 top-3 text-gray-300 text-xs"></i>
-                    <input type="text" id="searchBox" onkeyup="filterData()" placeholder="Search Station..." class="bg-gray-50 border border-gray-100 rounded-full pl-10 pr-4 py-2.5 text-xs outline-none w-64 focus:ring-2 ring-blue-50 transition">
-                </div>
+                <h1 class="text-3xl font-black text-slate-900 uppercase italic tracking-tighter">Shar Petroleum</h1>
+                <div id="roleBadge" class="inline-block mt-2 px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm"></div>
             </div>
             <div class="flex space-x-3">
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition shadow-md">Excel</button>
-                <button onclick="window.print()" class="bg-slate-800 hover:bg-black text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition shadow-md">Print</button>
+                <button onclick="window.print()" class="bg-white border-2 border-slate-200 px-6 py-3 rounded-2xl font-black text-[10px] uppercase text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fas fa-print mr-2"></i> Print Report
+                </button>
+                <button id="addBtn" onclick="openModal()" class="hidden bg-blue-600 hover:bg-black text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg transition-all">
+                    <i class="fas fa-plus mr-2"></i> New Entry
+                </button>
+                <button onclick="logout()" class="bg-white border-2 border-slate-100 px-6 py-3 rounded-2xl font-black text-[10px] uppercase text-red-500 hover:bg-red-50 transition">
+                    Logout
+                </button>
             </div>
         </header>
 
-        <div class="p-10">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-gray-100">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Gross Sales</p>
-                    <h2 id="totalGross" class="text-2xl font-black text-blue-900 mt-1">0.00 SR</h2>
-                </div>
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-gray-100">
-                    <p class="text-[9px] font-black text-red-400 uppercase tracking-widest">VAT (15%)</p>
-                    <h2 id="totalVatSum" class="text-2xl font-black text-red-500 mt-1">0.00 SR</h2>
-                </div>
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-emerald-50 bg-emerald-50/20">
-                    <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Net Profit</p>
-                    <h2 id="totalNetSum" class="text-2xl font-black text-slate-900 mt-1">0.00 SR</h2>
-                </div>
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-amber-50 bg-amber-50/20">
-                    <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest italic">Month's Tax</p>
-                    <h2 id="monthlyTaxSum" class="text-2xl font-black text-amber-700 mt-1">0.00 SR</h2>
-                </div>
+        <div class="bg-white p-6 rounded-[35px] shadow-sm border border-slate-100 mb-10 no-print flex flex-wrap items-center gap-6">
+            <div class="flex items-center space-x-3">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">From</span>
+                <input type="date" id="startDate" class="p-3 bg-slate-50 border rounded-xl text-xs font-bold outline-none focus:ring-2 ring-blue-100">
             </div>
-
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Transaction Records</h1>
-                <button onclick="openAddModal()" id="addBtn" class="bg-blue-900 hover:bg-black text-white px-8 py-4 rounded-2xl font-black text-[11px] uppercase shadow-2xl transition hidden">
-                    <i class="fas fa-plus-circle mr-2"></i> Add Entry
-                </button>
+            <div class="flex items-center space-x-3">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">To</span>
+                <input type="date" id="endDate" class="p-3 bg-slate-50 border rounded-xl text-xs font-bold outline-none focus:ring-2 ring-blue-100">
             </div>
+            <button onclick="filterByDate()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase hover:bg-blue-600 transition shadow-xl">
+                Apply Filter
+            </button>
+            <button onclick="loadData()" class="text-slate-400 hover:text-blue-600 font-black text-[9px] uppercase tracking-widest ml-auto">
+                <i class="fas fa-undo-alt mr-1"></i> Reset
+            </button>
+        </div>
 
-            <div class="bg-white rounded-[40px] border border-gray-50 shadow-sm overflow-hidden mb-10">
-                <table class="w-full text-left text-[11px] border-collapse" id="reportTable">
-                    <thead class="bg-slate-50 text-slate-400 font-black uppercase text-[9px] border-b">
+        <div class="print-only mb-10 text-center border-b pb-6">
+            <h1 class="text-4xl font-black uppercase">Shar Petroleum</h1>
+            <p class="text-sm font-bold text-gray-500 mt-2 italic">Sales & Profit Summary Report</p>
+            <p id="printDateRange" class="text-xs mt-4 font-mono font-bold"></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Card Sales</p>
+                <h2 id="totalGross" class="text-2xl font-black text-slate-800 mt-2">0.00 SR</h2>
+            </div>
+            <div class="admin-only hidden bg-white p-8 rounded-[40px] shadow-sm border border-red-50">
+                <p class="text-[9px] font-black text-red-400 uppercase tracking-widest">VAT (15%)</p>
+                <h2 id="totalTax" class="text-2xl font-black text-red-500 mt-2">0.00 SR</h2>
+            </div>
+            <div class="admin-only hidden bg-white p-8 rounded-[40px] shadow-sm border border-orange-50">
+                <p class="text-[9px] font-black text-orange-400 uppercase tracking-widest">Bank Fees (1.5%)</p>
+                <h2 id="totalFees" class="text-2xl font-black text-orange-600 mt-2">0.00 SR</h2>
+            </div>
+            <div class="admin-only hidden bg-blue-900 p-8 rounded-[40px] shadow-2xl border-none">
+                <p class="text-[9px] font-black text-blue-300 uppercase tracking-widest italic">Pure Net Profit</p>
+                <h2 id="pureNet" class="text-2xl font-black text-white mt-2">0.00 SR</h2>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[45px] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-[11px] border-collapse">
+                    <thead class="bg-slate-50/50 text-slate-400 font-black uppercase text-[9px] border-b border-slate-50">
                         <tr>
-                            <th class="p-6">Date</th>
+                            <th class="p-6">Date / Shift</th>
                             <th class="p-6">Station</th>
-                            <th class="p-6">Visa</th>
-                            <th class="p-6">Master</th>
-                            <th class="p-6 text-blue-600">Mada</th>
-                            <th class="p-6 text-red-400">VAT (-15%)</th>
-                            <th class="p-6 text-slate-900 bg-slate-50">Net Total</th>
-                            <th class="p-6 text-center admin-only hidden">Actions</th>
+                            <th class="p-6">Total SR</th>
+                            <th class="p-6">Fuel Mix</th>
+                            <th class="p-6 admin-only hidden">VAT</th>
+                            <th class="p-6 admin-only hidden">Profit</th>
+                            <th class="p-6 admin-only hidden no-print">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50" id="tableBody">
-                        <tr><td colspan="8" class="p-20 text-center text-gray-300 font-bold italic uppercase tracking-widest">Connecting to Cloud...</td></tr>
-                    </tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-50"></tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <div id="entryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] p-6">
-        <div class="bg-white rounded-[45px] w-full max-w-md p-10 shadow-2xl">
-            <h3 id="modalTitle" class="font-black text-slate-800 uppercase text-sm mb-8 text-center italic tracking-widest">New Entry</h3>
-            <form onsubmit="event.preventDefault(); addData();" class="space-y-4">
-                <input type="text" id="sName" class="w-full p-4 border rounded-2xl bg-gray-50 text-sm outline-none focus:ring-2 ring-blue-50 transition" placeholder="Station Name" required>
-                <div class="grid grid-cols-1 gap-3">
-                    <input type="number" id="sVisa" placeholder="Visa Card Sales" class="w-full p-4 border rounded-2xl bg-blue-50/20 text-sm outline-none" step="0.01">
-                    <input type="number" id="sMaster" placeholder="Master Card Sales" class="w-full p-4 border rounded-2xl bg-orange-50/20 text-sm outline-none" step="0.01">
-                    <input type="number" id="sMada" placeholder="Mada Card Sales" class="w-full p-4 border rounded-2xl bg-green-50/20 text-sm font-bold outline-none text-green-700" step="0.01">
+    <div id="entryModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center z-[100] p-6 no-print">
+        <div class="bg-white rounded-[45px] w-full max-w-lg p-10 shadow-2xl">
+            <h3 class="font-black text-slate-800 uppercase text-xs mb-8 text-center italic tracking-widest border-b pb-4">Sync Shift Data</h3>
+            <form onsubmit="event.preventDefault(); addData();" class="grid grid-cols-2 gap-4">
+                <input type="text" id="sName" placeholder="STATION NAME" class="col-span-1 p-4 bg-slate-50 border rounded-2xl outline-none text-sm font-bold uppercase" required>
+                <select id="sShift" class="col-span-1 p-4 bg-slate-50 border rounded-2xl outline-none text-sm font-bold">
+                    <option value="Morning">Morning Shift</option>
+                    <option value="Night">Night Shift</option>
+                </select>
+                <div class="col-span-2 grid grid-cols-3 gap-2 py-4">
+                    <input type="number" id="sVisa" placeholder="VISA" class="p-4 bg-blue-50/50 rounded-2xl outline-none text-sm font-bold">
+                    <input type="number" id="sMaster" placeholder="MASTER" class="p-4 bg-orange-50/50 rounded-2xl outline-none text-sm font-bold">
+                    <input type="number" id="sMada" placeholder="MADA" class="p-4 bg-emerald-50/50 rounded-2xl outline-none text-sm font-bold text-emerald-600">
                 </div>
-                <div class="flex space-x-3 pt-6">
-                    <button type="button" onclick="toggleModal()" class="w-1/3 bg-gray-100 text-gray-400 font-black py-4 rounded-2xl uppercase text-[9px] tracking-widest">Cancel</button>
-                    <button type="submit" id="saveBtn" class="w-2/3 bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-black transition-all uppercase text-[10px] tracking-widest">Sync to Cloud</button>
+                <div class="col-span-2 grid grid-cols-3 gap-2 pb-6">
+                    <input type="number" id="lDiesel" placeholder="DIESEL (L)" class="p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
+                    <input type="number" id="l91" placeholder="P91 (L)" class="p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold text-emerald-600">
+                    <input type="number" id="l95" placeholder="P95 (L)" class="p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold text-red-600">
+                </div>
+                <div class="col-span-2 flex space-x-3">
+                    <button type="button" onclick="closeModal()" class="w-1/3 bg-slate-100 p-4 rounded-2xl font-black text-[9px] uppercase">Cancel</button>
+                    <button type="submit" id="saveBtn" class="w-2/3 bg-blue-600 text-white p-4 rounded-2xl font-black text-[10px] uppercase shadow-xl hover:bg-black transition-all">Submit to Cloud</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // আপনার নতুন আপডেট করা ইউআরএল
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFPo_zvUOlXxdLqpw8ZYMzVsjjUM6OFlLcKdgLMgtKn-DOdQGSjcINjovxP-pGzGVU/exec"; 
-        
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCFX8Ul8xu0CrgiSnRqbBqv1G8hTuo-GhTZqKfB7oe58jhgkXjzE56AGMt_42swBo/exec";
+        const role = localStorage.getItem('userRole');
         let allData = [];
-        let editMode = false;
-        let editId = null;
 
-        function applySecurity() {
-            const role = localStorage.getItem('userRole');
-            const roleBadge = document.getElementById('roleBadge');
+        function checkPermissions() {
+            const badge = document.getElementById('roleBadge');
             if (role === 'admin') {
-                roleBadge.innerText = "Admin Account";
-                roleBadge.classList.replace('text-gray-400', 'text-blue-500');
+                badge.innerText = "Admin Access Control";
+                badge.classList.add('bg-blue-100', 'text-blue-600');
                 document.getElementById('addBtn').classList.remove('hidden');
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
             } else {
-                roleBadge.innerText = "Viewer Mode (Read Only)";
+                badge.innerText = "Staff View (Read-Only)";
+                badge.classList.add('bg-slate-100', 'text-slate-500');
             }
         }
 
         async function loadData() {
             try {
-                const response = await fetch(SCRIPT_URL);
-                allData = await response.json();
+                const res = await fetch(SCRIPT_URL);
+                allData = await res.json();
                 renderTable(allData);
-            } catch (error) { 
-                console.error("Cloud Error"); 
+            } catch (e) { console.error(e); }
+        }
+
+        // --- তারিখ ফিল্টার লজিক ---
+        function filterByDate() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+
+            if (!start || !end) {
+                alert("Please select both dates!");
+                return;
             }
-        }
 
-        function renderTable(dataList) {
-            const role = localStorage.getItem('userRole');
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = "";
-            let gSum = 0, vSum = 0, nSum = 0, mTax = 0;
-            const now = new Date();
+            const sDate = new Date(start);
+            const eDate = new Date(end);
+            eDate.setHours(23, 59, 59);
 
-            dataList.slice().reverse().forEach(row => {
-                const rDate = new Date(row.date);
-                const v = parseFloat(row.visa || 0), m = parseFloat(row.master || 0), md = parseFloat(row.mada || 0);
-                const vat = parseFloat(row.vatAmount || 0), net = parseFloat(row.totalAmount || 0);
-                
-                gSum += (v + m + md); vSum += vat; nSum += net;
-                if(rDate.getMonth() === now.getMonth() && rDate.getFullYear() === now.getFullYear()) mTax += vat;
-
-                let actionHtml = (role === 'admin') ? `
-                    <td class="p-6 text-center space-x-3 admin-only">
-                        <button onclick="openEditModal('${row.id}', '${row.stationName}', ${v}, ${m}, ${md})" class="text-blue-400 hover:text-blue-600 transition">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="deleteRow('${row.id}')" class="text-red-300 hover:text-red-500 transition">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>` : '';
-
-                tableBody.innerHTML += `
-                    <tr class="hover:bg-blue-50/40 transition border-b border-gray-50">
-                        <td class="p-6 text-gray-400 font-medium">${rDate.toLocaleDateString()}</td>
-                        <td class="p-6 font-black text-blue-900 uppercase">${row.stationName}</td>
-                        <td class="p-6">${v.toFixed(2)}</td>
-                        <td class="p-6 text-orange-500">${m.toFixed(2)}</td>
-                        <td class="p-6 font-black text-blue-600">${md.toFixed(2)}</td>
-                        <td class="p-6 text-red-500 font-bold italic">-${vat.toFixed(2)}</td>
-                        <td class="p-6 font-black text-slate-900 bg-slate-50/50">${net.toFixed(2)}</td>
-                        ${actionHtml}
-                    </tr>`;
+            const filtered = allData.filter(row => {
+                const rowDate = new Date(row.date);
+                return rowDate >= sDate && rowDate <= eDate;
             });
-            document.getElementById('totalGross').innerText = gSum.toLocaleString() + " SR";
-            document.getElementById('totalVatSum').innerText = vSum.toLocaleString() + " SR";
-            document.getElementById('totalNetSum').innerText = nSum.toLocaleString() + " SR";
-            document.getElementById('monthlyTaxSum').innerText = mTax.toLocaleString() + " SR";
+
+            document.getElementById('printDateRange').innerText = `Report Range: ${start} to ${end}`;
+            renderTable(filtered);
         }
 
-        function openAddModal() {
-            editMode = false; editId = null;
-            document.getElementById('modalTitle').innerText = "New Transaction";
-            document.getElementById('saveBtn').innerText = "Sync to Cloud";
-            document.querySelectorAll('input').forEach(i => i.value = "");
-            toggleModal();
-        }
+        function renderTable(data) {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            let gTotal=0, tTax=0, tNet=0;
 
-        function openEditModal(id, name, v, m, md) {
-            editMode = true; editId = id;
-            document.getElementById('modalTitle').innerText = "Update Record";
-            document.getElementById('saveBtn').innerText = "Apply Changes";
-            document.getElementById('sName').value = name;
-            document.getElementById('sVisa').value = v;
-            document.getElementById('sMaster').value = m;
-            document.getElementById('sMada').value = md;
-            toggleModal();
+            data.slice().reverse().forEach(row => {
+                const cardTotal = (parseFloat(row.visa)||0) + (parseFloat(row.master)||0) + (parseFloat(row.mada)||0);
+                const vat = cardTotal - (cardTotal/1.15);
+                const net = cardTotal/1.15;
+                gTotal += cardTotal; tTax += vat; tNet += net;
+
+                let rowHtml = `
+                    <tr class="hover:bg-slate-50/50 transition">
+                        <td class="p-6 font-bold text-slate-400 text-[10px] uppercase">${new Date(row.date).toLocaleDateString()}<br><span class="text-blue-500 text-[8px]">${row.shift || ''}</span></td>
+                        <td class="p-6 font-black text-slate-800 uppercase">${row.stationName}</td>
+                        <td class="p-6 font-bold">${cardTotal.toFixed(2)} SR</td>
+                        <td class="p-6 text-[9px] font-bold text-slate-400">D:${row.diesel||0} | 91:${row.p91||0} | 95:${row.p95||0}</td>`;
+                
+                if (role === 'admin') {
+                    rowHtml += `
+                        <td class="p-6 text-red-500 font-bold">-${vat.toFixed(2)}</td>
+                        <td class="p-6 font-black text-blue-900 bg-blue-50/30">${net.toFixed(2)} SR</td>
+                        <td class="p-6 text-center no-print">
+                            <button onclick="deleteRow('${row.id}')" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
+                        </td>`;
+                }
+                body.innerHTML += rowHtml + `</tr>`;
+            });
+
+            document.getElementById('totalGross').innerText = gTotal.toLocaleString() + " SR";
+            if (role === 'admin') {
+                document.getElementById('totalTax').innerText = tTax.toLocaleString() + " SR";
+                document.getElementById('totalFees').innerText = (gTotal * 0.015).toLocaleString() + " SR";
+                document.getElementById('pureNet').innerText = tNet.toLocaleString() + " SR";
+            }
         }
 
         async function addData() {
             const btn = document.getElementById('saveBtn');
-            const v = parseFloat(document.getElementById('sVisa').value) || 0, m = parseFloat(document.getElementById('sMaster').value) || 0, md = parseFloat(document.getElementById('sMada').value) || 0;
-            const total = v + m + md, net = (total / 1.15).toFixed(2), vat = (total - net).toFixed(2);
-            
-            btn.disabled = true; 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
-            
-            const payload = { 
-                action: editMode ? "edit" : "add", 
-                id: editId, 
-                stationName: document.getElementById('sName').value, 
-                visa: v, master: m, mada: md, vatAmount: vat, totalAmount: net 
+            btn.disabled = true; btn.innerHTML = "Syncing...";
+            const payload = {
+                stationName: document.getElementById('sName').value,
+                shift: document.getElementById('sShift').value,
+                visa: document.getElementById('sVisa').value,
+                master: document.getElementById('sMaster').value,
+                mada: document.getElementById('sMada').value,
+                diesel: document.getElementById('lDiesel').value,
+                p91: document.getElementById('l91').value,
+                p95: document.getElementById('l95').value
             };
-
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            toggleModal(); loadData();
-            btn.disabled = false;
+            closeModal(); loadData();
+            btn.disabled = false; btn.innerHTML = "Submit to Cloud";
         }
 
-        async function deleteRow(id) {
-            if (!confirm("Are you sure you want to delete this record forever?")) return;
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
-            loadData();
-        }
-
-        function toggleModal() { 
-            const m = document.getElementById('entryModal');
-            m.classList.toggle('hidden'); m.classList.toggle('flex');
-        }
-
+        function openModal() { document.getElementById('entryModal').classList.replace('hidden', 'flex'); }
+        function closeModal() { document.getElementById('entryModal').classList.replace('flex', 'hidden'); }
         function logout() { localStorage.clear(); window.location.href = "index.html"; }
 
-        function filterData() {
-            const term = document.getElementById('searchBox').value.toLowerCase();
-            const filtered = allData.filter(item => item.stationName.toLowerCase().includes(term));
-            renderTable(filtered);
-        }
-
-        function exportToExcel() {
-            let table = document.getElementById("reportTable");
-            let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML);
-            let link = document.createElement('a');
-            link.download = 'Shar_Report_' + new Date().toLocaleDateString() + '.xls'; 
-            link.href = url; link.click();
-        }
-
         window.onload = () => {
-            if(!localStorage.getItem('userRole')) window.location.href = "index.html";
-            applySecurity(); loadData();
+            if(!role) window.location.href = "index.html";
+            checkPermissions();
+            loadData();
         };
     </script>
 </body>
