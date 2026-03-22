@@ -3,45 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Management Cloud</title>
+    <title>Shar Petroleum - Analytics Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s ease; }
-        
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
         .premium-card { box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05); border-radius: 40px; }
         
-        /* Dark Mode CSS */
+        /* Dark Mode */
         body.dark { background-color: #0b0f19; color: #f8fafc; }
         .dark .bg-white { background-color: #161d2f !important; color: white; border-color: #1e293b; }
         .dark .text-slate-900, .dark .text-blue-900 { color: #f8fafc; }
-        .dark .text-slate-400 { color: #94a3b8; }
         .dark .bg-slate-50 { background-color: #1e293b !important; }
         .dark input { background-color: #1e293b !important; color: white; border: 1px solid #334155 !important; }
-        .dark .premium-card { box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.4); }
-
-        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body class="bg-[#f4f7fe] flex min-h-screen">
 
     <aside class="w-80 bg-white border-r border-slate-50 flex flex-col no-print p-8 transition-all">
         <div class="flex items-center gap-4 mb-12">
-            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
-                <i class="fas fa-droplet text-white text-xl"></i>
+            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 text-white">
+                <i class="fas fa-droplet text-xl"></i>
             </div>
             <div>
                 <h1 class="text-sm font-extrabold uppercase tracking-tighter text-blue-900">Shar Petroleum</h1>
-                <p id="userRoleBadge" class="text-[10px] font-bold text-slate-400 uppercase italic">Admin Account</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase italic">Admin Panel</p>
             </div>
         </div>
 
         <nav class="flex-1 space-y-4">
             <button class="w-full flex items-center gap-4 px-6 py-5 bg-blue-600 text-white rounded-[25px] font-bold text-sm shadow-xl shadow-blue-100">
-                <i class="fas fa-chart-line text-lg"></i> ANALYTICS DASHBOARD
+                <i class="fas fa-chart-pie text-lg"></i> DASHBOARD
             </button>
-            
             <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 px-6 py-5 text-slate-500 hover:bg-slate-50 rounded-[25px] font-bold text-sm transition">
                 <i id="modeIcon" class="fas fa-moon text-lg text-blue-500"></i> <span id="modeText">NIGHT MODE</span>
             </button>
@@ -54,39 +49,49 @@
 
     <main class="flex-1 p-12 overflow-y-auto">
         
-        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6 no-print">
-            <div class="relative w-full md:w-96 bg-white premium-card flex items-center px-6 py-1">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 no-print">
+            <div class="relative w-full md:w-80 bg-white premium-card flex items-center px-6 py-1">
                 <i class="fas fa-search text-slate-300"></i>
                 <input type="text" id="searchInput" onkeyup="searchStation()" placeholder="Search Station..." class="w-full bg-transparent border-none text-xs font-bold outline-none p-4">
             </div>
 
             <div class="flex items-center gap-4 bg-white p-2 px-6 rounded-[25px] premium-card">
-                <i class="fas fa-calendar-alt text-slate-300"></i>
-                <input type="date" id="startDate" class="bg-transparent border-none text-xs font-bold outline-none p-2">
+                <input type="date" id="startDate" class="bg-transparent border-none text-xs font-bold outline-none p-2 text-slate-500">
                 <span class="text-slate-300 font-bold">to</span>
-                <input type="date" id="endDate" class="bg-transparent border-none text-xs font-bold outline-none p-2">
-                <button onclick="applyFilter()" class="bg-blue-600 text-white px-6 py-2 rounded-2xl font-bold text-[10px] uppercase shadow-lg hover:bg-black transition">Filter</button>
+                <input type="date" id="endDate" class="bg-transparent border-none text-xs font-bold outline-none p-2 text-slate-500">
+                <button onclick="applyFilter()" class="bg-blue-600 text-white px-6 py-2 rounded-2xl font-bold text-[10px] uppercase shadow-lg">Filter</button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             <div class="bg-white p-10 premium-card">
                 <p class="text-[10px] font-extrabold text-slate-400 uppercase mb-4 tracking-widest">Gross Sales</p>
                 <h2 id="totalGross" class="text-3xl font-extrabold text-slate-900">0 SR</h2>
             </div>
             <div class="bg-white p-10 premium-card">
-                <p class="text-[10px] font-extrabold text-red-400 uppercase mb-4 tracking-widest">VAT (15%)</p>
+                <p class="text-[10px] font-extrabold text-red-400 uppercase mb-4 tracking-widest">VAT (15%) Collection</p>
                 <h2 id="totalTax" class="text-3xl font-extrabold text-red-500">0 SR</h2>
             </div>
             <div class="bg-white p-10 premium-card">
-                <p class="text-[10px] font-extrabold text-orange-400 uppercase mb-4 tracking-widest">Month's Tax</p>
-                <h2 class="text-3xl font-extrabold text-orange-600">1,000 SR</h2>
+                <p class="text-[10px] font-extrabold text-orange-400 uppercase mb-4 tracking-widest">Target Tax</p>
+                <h2 class="text-3xl font-extrabold text-orange-600">5,000 SR</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <div class="bg-white p-10 premium-card">
+                <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-widest mb-6">Sales Trend (Daily)</h3>
+                <canvas id="salesChart" height="150"></canvas>
+            </div>
+            <div class="bg-white p-10 premium-card">
+                <h3 class="text-xs font-extrabold text-red-500 uppercase tracking-widest mb-6">VAT/Tax Analytics</h3>
+                <canvas id="taxChart" height="150"></canvas>
             </div>
         </div>
 
         <div class="flex justify-between items-center mb-10">
-            <h3 class="text-2xl font-extrabold text-slate-900 italic uppercase tracking-tighter">Transaction Records</h3>
-            <button onclick="openModal()" class="bg-blue-900 text-white px-10 py-5 rounded-[25px] font-bold text-xs uppercase shadow-2xl hover:scale-105 transition no-print">
+            <h3 class="text-xl font-extrabold text-slate-900 italic uppercase">Transaction Records</h3>
+            <button class="bg-blue-900 text-white px-10 py-5 rounded-[25px] font-bold text-xs uppercase shadow-2xl hover:scale-105 transition no-print">
                 <i class="fas fa-plus mr-2"></i> Add Entry
             </button>
         </div>
@@ -97,11 +102,9 @@
                     <tr>
                         <th class="p-8">Date</th>
                         <th class="p-8">Station</th>
-                        <th class="p-8">Visa</th>
-                        <th class="p-8">Master</th>
-                        <th class="p-8 text-blue-600 font-black">Mada</th>
-                        <th class="p-8 text-red-500">VAT (-15%)</th>
-                        <th class="p-8 font-black text-slate-900">Total Amount</th>
+                        <th class="p-8 text-blue-600">Mada Total</th>
+                        <th class="p-8 text-red-500">VAT (15%)</th>
+                        <th class="p-8 font-black text-slate-900">Gross Total</th>
                         <th class="p-8 text-center no-print">Actions</th>
                     </tr>
                 </thead>
@@ -113,19 +116,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCFX8Ul8xu0CrgiSnRqbBqv1G8hTuo-GhTZqKfB7oe58jhgkXjzE56AGMt_42swBo/exec";
         let rawData = [];
-
-        function searchStation() {
-            let input = document.getElementById("searchInput").value.toUpperCase();
-            let table = document.getElementById("dataTable");
-            let tr = table.getElementsByTagName("tr");
-            for (let i = 1; i < tr.length; i++) {
-                let td = tr[i].getElementsByTagName("td")[1];
-                if (td) {
-                    let textValue = td.textContent || td.innerText;
-                    tr[i].style.display = textValue.toUpperCase().indexOf(input) > -1 ? "" : "none";
-                }
-            }
-        }
+        let salesChart, taxChart;
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark');
@@ -137,7 +128,12 @@
         async function loadData() {
             const res = await fetch(SCRIPT_URL);
             rawData = await res.json();
-            renderTable(rawData);
+            renderDashboard(rawData);
+        }
+
+        function renderDashboard(data) {
+            renderTable(data);
+            updateCharts(data);
         }
 
         function renderTable(data) {
@@ -146,27 +142,18 @@
             let gTotal=0, tVat=0;
 
             data.slice().reverse().forEach(row => {
-                const mada = parseFloat(row.mada)||0;
-                const visa = parseFloat(row.visa)||0;
-                const master = parseFloat(row.master)||0;
-                const total = mada + visa + master;
+                const total = (parseFloat(row.mada)||0) + (parseFloat(row.visa)||0) + (parseFloat(row.master)||0);
                 const vat = total - (total/1.15);
-                
                 gTotal += total; tVat += vat;
 
                 body.innerHTML += `
                     <tr class="hover:bg-slate-50/50 transition">
                         <td class="p-8 font-bold text-slate-400">${new Date(row.date).toLocaleDateString()}</td>
                         <td class="p-8 font-black text-blue-900 uppercase italic tracking-tighter">${row.stationName}</td>
-                        <td class="p-8 font-bold">${visa.toFixed(2)}</td>
-                        <td class="p-8 font-bold text-orange-400">${master.toFixed(2)}</td>
-                        <td class="p-8 font-black text-blue-600">${mada.toFixed(2)}</td>
+                        <td class="p-8 font-black text-blue-600">${(parseFloat(row.mada)||0).toFixed(2)}</td>
                         <td class="p-8 text-red-500 font-bold">-${vat.toFixed(2)}</td>
                         <td class="p-8 font-black text-slate-900">${total.toFixed(2)}</td>
-                        <td class="p-8 text-center no-print text-slate-200">
-                            <i class="fas fa-edit mr-3 cursor-pointer hover:text-blue-500"></i>
-                            <i class="fas fa-trash cursor-pointer hover:text-red-500"></i>
-                        </td>
+                        <td class="p-8 text-center no-print"><i class="fas fa-trash-alt text-slate-200 cursor-pointer hover:text-red-500"></i></td>
                     </tr>`;
             });
 
@@ -174,15 +161,51 @@
             document.getElementById('totalTax').innerText = tVat.toLocaleString() + " SR";
         }
 
+        function updateCharts(data) {
+            const last7Days = data.slice(-7);
+            const labels = last7Days.map(row => new Date(row.date).toLocaleDateString());
+            const salesValues = last7Days.map(row => (parseFloat(row.mada)||0) + (parseFloat(row.visa)||0) + (parseFloat(row.master)||0));
+            const taxValues = salesValues.map(v => v - (v/1.15));
+
+            if (salesChart) salesChart.destroy();
+            salesChart = new Chart(document.getElementById('salesChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Sales', data: salesValues, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.4, borderWidth: 4 }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+            });
+
+            if (taxChart) taxChart.destroy();
+            taxChart = new Chart(document.getElementById('taxChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'VAT', data: taxValues, backgroundColor: '#ef4444', borderRadius: 8 }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+            });
+        }
+
+        function searchStation() {
+            let input = document.getElementById("searchInput").value.toUpperCase();
+            let tr = document.getElementById("dataTable").getElementsByTagName("tr");
+            for (let i = 1; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName("td")[1];
+                if (td) tr[i].style.display = td.innerText.toUpperCase().indexOf(input) > -1 ? "" : "none";
+            }
+        }
+
         function applyFilter() {
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
-            if(!start || !end) return alert("Select dates");
+            if(!start || !end) return alert("Select Range");
             const filtered = rawData.filter(row => {
                 const d = new Date(row.date);
                 return d >= new Date(start) && d <= new Date(end).setHours(23,59,59);
             });
-            renderTable(filtered);
+            renderDashboard(filtered);
         }
 
         window.onload = loadData;
