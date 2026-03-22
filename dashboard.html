@@ -1,203 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .glass-card { background: white; border-radius: 30px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
-        .sidebar-active { background: #2563eb; color: white; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4); }
-        #entryModal { display: none; }
-        #entryModal.active { display: flex; }
-    </style>
-</head>
-<body class="flex min-h-screen">
+/**
+ * ১. ডাটা রিড করার ফাংশন (GET Request)
+ */
+function doGet() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data = sheet.getDataRange().getValues();
+  
+  // ১ নম্বর রো এখন হেডার (date, station Name, mada, visa, master)
+  const headers = data[0];
+  const rows = data.slice(1);
+  
+  const result = rows.map((row, index) => {
+    let obj = { rowId: index + 2 }; // শিটের রো নম্বর ট্র্যাক করার জন্য
+    headers.forEach((header, i) => {
+      // কলামের নাম থেকে স্পেস সরিয়ে এবং ছোট হাতের অক্ষরে কি (Key) তৈরি করবে
+      // উদাহরণ: "station Name" হয়ে যাবে "stationname"
+      let key = header.toString().toLowerCase().replace(/\s/g, '');
+      obj[key] = row[i];
+    });
+    return obj;
+  });
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
-    <aside class="w-72 bg-white border-r border-slate-100 flex flex-col p-6 fixed h-full">
-        <div class="flex items-center gap-3 mb-12 px-2">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fas fa-droplet text-xl"></i></div>
-            <div>
-                <h1 class="text-sm font-extrabold text-blue-900 uppercase">Shar Petroleum</h1>
-                <p class="text-[10px] text-blue-400 font-bold italic uppercase leading-none">Admin Account</p>
-            </div>
-        </div>
-        <nav class="flex-1 space-y-2">
-            <button class="w-full flex items-center gap-4 px-5 py-4 sidebar-active rounded-2xl font-bold text-xs uppercase"><i class="fas fa-chart-pie text-lg"></i> Analytics Dashboard</button>
-        </nav>
-        <button onclick="window.location.href='index.html'" class="w-full py-4 border border-slate-100 text-red-500 rounded-2xl font-bold text-xs uppercase mt-auto flex items-center justify-center gap-2 hover:bg-red-50 transition"><i class="fas fa-sign-out-alt"></i> Logout</button>
-    </aside>
-
-    <main class="flex-1 ml-72 p-10">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-slate-400 uppercase mb-2">Gross Sales</p><h2 id="totalGross" class="text-2xl font-black text-blue-900">0.00 SR</h2></div>
-            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-red-400 uppercase mb-2">VAT (15%)</p><h2 id="totalTax" class="text-2xl font-black text-red-500">0.00 SR</h2></div>
-            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-green-500 uppercase mb-2">Net Profit</p><h2 id="totalNet" class="text-2xl font-black text-slate-900">0.00 SR</h2></div>
-            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-orange-400 uppercase mb-2">System Status</p><h2 class="text-2xl font-black text-orange-500 italic">LIVE</h2></div>
-        </div>
-
-        <div class="flex justify-between items-end mb-6">
-            <h3 class="text-2xl font-black text-slate-800 italic uppercase">Transaction Records</h3>
-            <button onclick="openModal()" class="px-10 py-5 bg-[#1e3a8a] text-white rounded-[25px] font-bold text-xs uppercase shadow-xl flex items-center gap-3 active:scale-95 transition"><i class="fas fa-plus-circle text-lg"></i> Add Entry</button>
-        </div>
-
-        <div class="glass-card overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-slate-50/50 uppercase text-[10px] text-slate-400">
-                    <tr><th class="p-8">Date</th><th class="p-8">Station</th><th class="p-8">Visa</th><th class="p-8 text-orange-300">Master</th><th class="p-8 text-blue-600">Mada</th><th class="p-8 text-red-400">VAT (-15%)</th><th class="p-8 font-black text-slate-900">Net Total</th><th class="p-8 text-center">Actions</th></tr>
-                </thead>
-                <tbody id="tableBody" class="text-xs font-bold divide-y divide-slate-50"></tbody>
-            </table>
-        </div>
-    </main>
-
-    <div id="entryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-10 rounded-[40px] w-full max-w-md shadow-2xl">
-            <h2 id="modalTitle" class="text-xl font-black mb-6 uppercase italic">Record Transaction</h2>
-            <form id="dataForm" class="space-y-4">
-                <input type="hidden" id="editIndex">
-                <input type="date" id="formDate" required class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" id="formStation" placeholder="Station Name" required class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm uppercase outline-none focus:ring-2 focus:ring-blue-500">
-                <div class="grid grid-cols-3 gap-3">
-                    <input type="number" step="any" id="formMada" placeholder="Mada" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="number" step="any" id="formVisa" placeholder="Visa" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="number" step="any" id="formMaster" placeholder="Master" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="flex gap-4 mt-6">
-                    <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold uppercase text-xs">Cancel</button>
-                    <button type="submit" id="saveBtn" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold uppercase text-xs shadow-lg">Save Data</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // আপনার নতুন লিঙ্ক এখানে আপডেট করা হয়েছে
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxgExwhvoMWg6oLw7pzsBm38T0c2h_4-eHrQkrbwzXruxypYIT_UWMJ10LNNSUnYAp0/exec";
-        let cachedData = [];
-
-        function openModal(editIdx = null) {
-            const modal = document.getElementById('entryModal');
-            modal.classList.add('active');
-            if(editIdx !== null) {
-                document.getElementById('modalTitle').innerText = "Edit Entry";
-                const row = cachedData[editIdx];
-                document.getElementById('editIndex').value = editIdx;
-                
-                // Date handling
-                const rawDate = row.date || row.Date;
-                if(rawDate) {
-                    const d = new Date(rawDate);
-                    document.getElementById('formDate').value = d.toISOString().split('T')[0];
-                }
-                
-                document.getElementById('formStation').value = row.stationname || row.Station || row.stationName || "";
-                document.getElementById('formMada').value = row.mada || row.Mada || 0;
-                document.getElementById('formVisa').value = row.visa || row.Visa || 0;
-                document.getElementById('formMaster').value = row.master || row.Master || 0;
-            } else {
-                document.getElementById('modalTitle').innerText = "New Record";
-                document.getElementById('dataForm').reset();
-                document.getElementById('editIndex').value = "";
-            }
-        }
-
-        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
-
-        async function loadData() {
-            try {
-                const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
-                cachedData = data;
-                renderTable(data);
-            } catch(e) { console.error("Data fetch error", e); }
-        }
-
-        function renderTable(data) {
-            const body = document.getElementById('tableBody');
-            body.innerHTML = "";
-            let gTotal=0, tVat=0, tNet=0;
-
-            // নতুন ডাটা সবার উপরে দেখানোর জন্য রিভার্স লুপ
-            data.slice().reverse().forEach((row, index) => {
-                const actualIndex = data.length - 1 - index;
-                
-                // স্মার্ট রিডিং: কলামের নাম ছোট-বড় যাই হোক ধরবে
-                const m = parseFloat(row.mada || row.Mada || row.MADA || 0);
-                const v = parseFloat(row.visa || row.Visa || row.VISA || 0);
-                const ms = parseFloat(row.master || row.Master || row.MASTER || 0);
-                const station = row.stationname || row.Station || row.stationName || "N/A";
-                
-                const rawDate = row.date || row.Date;
-                const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "---";
-
-                const gross = m + v + ms;
-                const net = gross / 1.15;
-                const vat = gross - net;
-                
-                gTotal += gross; tVat += vat; tNet += net;
-
-                body.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-50">
-                        <td class="p-8 text-slate-400 font-medium">${dateStr}</td>
-                        <td class="p-8 text-blue-900 font-black uppercase italic tracking-tighter">${station}</td>
-                        <td class="p-8 text-slate-500">${v.toFixed(2)}</td>
-                        <td class="p-8 text-orange-400">${ms.toFixed(2)}</td>
-                        <td class="p-8 text-blue-600 font-black">${m.toFixed(2)}</td>
-                        <td class="p-8 text-red-400">-${vat.toFixed(2)}</td>
-                        <td class="p-8 text-slate-900 font-extrabold">${net.toFixed(2)}</td>
-                        <td class="p-8 text-center flex justify-center gap-3">
-                            <button onclick="openModal(${actualIndex})" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition"><i class="fas fa-edit text-xs"></i></button>
-                            <button onclick="deleteRow(${actualIndex})" class="w-8 h-8 rounded-full bg-red-50 text-red-300 flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash-alt text-xs"></i></button>
-                        </td>
-                    </tr>`;
-            });
-
-            document.getElementById('totalGross').innerText = gTotal.toFixed(2) + " SR";
-            document.getElementById('totalTax').innerText = tVat.toFixed(2) + " SR";
-            document.getElementById('totalNet').innerText = tNet.toFixed(2) + " SR";
-        }
-
-        document.getElementById('dataForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            const editIdx = document.getElementById('editIndex').value;
-            btn.innerText = "Processing..."; btn.disabled = true;
-
-            const payload = {
-                date: document.getElementById('formDate').value,
-                stationName: document.getElementById('formStation').value.toUpperCase(),
-                mada: Number(document.getElementById('formMada').value) || 0,
-                visa: Number(document.getElementById('formVisa').value) || 0,
-                master: Number(document.getElementById('formMaster').value) || 0,
-                action: editIdx === "" ? "add" : "edit",
-                index: editIdx
-            };
-
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
-            .then(() => {
-                setTimeout(() => {
-                    closeModal();
-                    loadData();
-                    btn.innerText = "Save Data"; btn.disabled = false;
-                }, 2000);
-            });
-        };
-
-        async function deleteRow(idx) {
-            if(!confirm("Are you sure you want to delete this?")) return;
-            await fetch(SCRIPT_URL, { 
-                method: 'POST', 
-                body: JSON.stringify({ index: idx, action: "delete" }), 
-                mode: 'no-cors' 
-            });
-            setTimeout(loadData, 1500);
-        }
-
-        window.onload = loadData;
-    </script>
-</body>
-</html>
+/**
+ * ২. ডাটা রাইট, এডিট এবং ডিলিট করার ফাংশন (POST Request)
+ */
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  let params;
+  
+  try {
+    params = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return ContentService.createTextOutput("Error: Invalid JSON").setMimeType(ContentService.MimeType.TEXT);
+  }
+  
+  const action = params.action;
+  
+  // নতুন ডাটা যোগ করা
+  if (action === "add") {
+    sheet.appendRow([
+      params.date, 
+      params.stationName, 
+      params.mada, 
+      params.visa, 
+      params.master
+    ]);
+  } 
+  // বিদ্যমান ডাটা এডিট করা
+  else if (action === "edit") {
+    const rowNum = parseInt(params.index) + 2;
+    sheet.getRange(rowNum, 1, 1, 5).setValues([[
+      params.date, 
+      params.stationName, 
+      params.mada, 
+      params.visa, 
+      params.master
+    ]]);
+  } 
+  // ডাটা ডিলিট করা
+  else if (action === "delete") {
+    const rowNum = parseInt(params.index) + 2;
+    sheet.deleteRow(rowNum);
+  }
+  
+  return ContentService.createTextOutput("Success")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
