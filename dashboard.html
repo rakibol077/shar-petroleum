@@ -10,7 +10,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
-        .premium-card { box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05); border-radius: 40px; }
+        .premium-card { box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05); border-radius: 40px; border: 1px solid rgba(0,0,0,0.02); }
         
         /* Dark Mode */
         body.dark { background-color: #0b0f19; color: #f8fafc; }
@@ -26,7 +26,7 @@
 </head>
 <body class="bg-[#f4f7fe] flex min-h-screen">
 
-    <aside class="w-80 bg-white border-r border-slate-50 flex flex-col p-8 no-print">
+    <aside class="w-80 bg-white border-r border-slate-50 flex flex-col p-8 no-print transition-all">
         <div class="flex items-center gap-4 mb-12">
             <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg text-white">
                 <i class="fas fa-droplet text-xl"></i>
@@ -38,7 +38,7 @@
         </div>
         <nav class="flex-1 space-y-4">
             <button class="w-full flex items-center gap-4 px-6 py-5 bg-blue-600 text-white rounded-[25px] font-bold text-sm shadow-xl">
-                <i class="fas fa-chart-line"></i> DASHBOARD
+                <i class="fas fa-chart-line"></i> ANALYTICS
             </button>
             <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 px-6 py-5 text-slate-500 hover:bg-slate-50 rounded-[25px] font-bold text-sm transition">
                 <i id="modeIcon" class="fas fa-moon text-blue-500"></i> <span id="modeText">NIGHT MODE</span>
@@ -50,6 +50,7 @@
     </aside>
 
     <main class="flex-1 p-12 overflow-y-auto">
+        
         <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div class="relative w-full md:w-80 bg-white premium-card flex items-center px-6 py-1">
                 <i class="fas fa-search text-slate-300"></i>
@@ -59,7 +60,7 @@
                 <input type="date" id="startDate" class="bg-transparent border-none text-xs font-bold outline-none p-2 text-slate-500">
                 <span class="text-slate-300 font-bold">to</span>
                 <input type="date" id="endDate" class="bg-transparent border-none text-xs font-bold outline-none p-2 text-slate-500">
-                <button onclick="applyFilter()" class="bg-blue-600 text-white px-6 py-2 rounded-2xl font-bold text-[10px] uppercase shadow-lg">Filter</button>
+                <button onclick="applyFilter()" class="bg-blue-600 text-white px-6 py-2 rounded-2xl font-bold text-[10px] uppercase shadow-lg hover:bg-black">Filter</button>
             </div>
         </header>
 
@@ -73,18 +74,24 @@
                 <h2 id="totalTax" class="text-3xl font-extrabold text-red-500">0 SR</h2>
             </div>
             <div class="bg-white p-10 premium-card text-center">
-                <p class="text-[10px] font-extrabold text-orange-400 uppercase tracking-widest mb-2">Target</p>
+                <p class="text-[10px] font-extrabold text-orange-400 uppercase tracking-widest mb-2">Monthly Target</p>
                 <h2 class="text-3xl font-extrabold text-orange-600">5,000 SR</h2>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div class="bg-white p-8 premium-card"><canvas id="salesChart" height="150"></canvas></div>
-            <div class="bg-white p-8 premium-card"><canvas id="taxChart" height="150"></canvas></div>
+            <div class="bg-white p-8 premium-card">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-4">Daily Sales Analytics</h3>
+                <canvas id="salesChart" height="150"></canvas>
+            </div>
+            <div class="bg-white p-8 premium-card">
+                <h3 class="text-[10px] font-bold text-red-400 uppercase mb-4">VAT Collection Trend</h3>
+                <canvas id="taxChart" height="150"></canvas>
+            </div>
         </div>
 
         <div class="flex justify-between items-center mb-10">
-            <h3 class="text-xl font-extrabold text-slate-900 italic uppercase">Records</h3>
+            <h3 class="text-xl font-extrabold text-slate-900 italic uppercase">Transaction Logs</h3>
             <button onclick="openModal()" class="bg-blue-900 text-white px-10 py-5 rounded-[25px] font-bold text-xs uppercase shadow-2xl hover:scale-105 transition">
                 <i class="fas fa-plus mr-2"></i> Add Entry
             </button>
@@ -97,8 +104,9 @@
                         <th class="p-8">Date</th>
                         <th class="p-8">Station</th>
                         <th class="p-8 text-blue-600">Mada</th>
+                        <th class="p-8 text-orange-400">Visa</th>
                         <th class="p-8 text-red-500">VAT</th>
-                        <th class="p-8 text-slate-900">Total</th>
+                        <th class="p-8 font-black text-slate-900">Total</th>
                         <th class="p-8 text-center">Actions</th>
                     </tr>
                 </thead>
@@ -107,25 +115,27 @@
         </div>
     </main>
 
-    <div id="entryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div id="entryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="bg-white p-10 rounded-[40px] w-full max-w-md shadow-2xl">
-            <h2 class="text-xl font-black mb-6 uppercase">Add/Edit Data</h2>
+            <h2 id="modalTitle" class="text-xl font-black mb-6 uppercase tracking-tighter">Add Transaction</h2>
             <form id="dataForm" class="space-y-4">
                 <input type="hidden" id="editRowId">
-                <input type="date" id="formDate" required class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold">
-                <input type="text" id="formStation" placeholder="Station Name" required class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold">
-                <input type="number" step="any" id="formMada" placeholder="Mada Amount" required class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold">
-                <input type="number" step="any" id="formVisa" placeholder="Visa Amount (Optional)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold">
+                <input type="date" id="formDate" required class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm">
+                <input type="text" id="formStation" placeholder="Station Name" required class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" step="any" id="formMada" placeholder="Mada" required class="p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm">
+                    <input type="number" step="any" id="formVisa" placeholder="Visa" class="p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm">
+                </div>
                 <div class="flex gap-4 mt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold uppercase text-xs">Cancel</button>
-                    <button type="submit" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold uppercase text-xs shadow-lg">Save</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold uppercase text-xs shadow-lg shadow-blue-200">Save Data</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCFX8Ul8xu0CrgiSnRqbBqv1G8hTuo-GhTZqKfB7oe58jhgkXjzE56AGMt_42swBo/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMgKCcU-BGQoeI1jSnV8xSU8neDiV9yuF2Q0B2AHV1vAblIn1rNa__oCkeMbNgcrS/exec";
         let rawData = [];
         let salesChart, taxChart;
 
@@ -134,12 +144,15 @@
             document.getElementById('entryModal').classList.remove('active'); 
             document.getElementById('dataForm').reset();
             document.getElementById('editRowId').value = '';
+            document.getElementById('modalTitle').innerText = "Add Transaction";
         }
 
         async function loadData() {
-            const res = await fetch(SCRIPT_URL);
-            rawData = await res.json();
-            renderDashboard(rawData);
+            try {
+                const res = await fetch(SCRIPT_URL);
+                rawData = await res.json();
+                renderDashboard(rawData);
+            } catch(e) { console.error("Data load failed"); }
         }
 
         function renderDashboard(data) {
@@ -153,20 +166,25 @@
             let gTotal=0, tVat=0;
 
             data.slice().reverse().forEach((row, index) => {
-                const total = (parseFloat(row.mada)||0) + (parseFloat(row.visa)||0);
+                const actualIndex = data.length - 1 - index;
+                const mada = parseFloat(row.mada) || 0;
+                const visa = parseFloat(row.visa) || 0;
+                const total = mada + visa;
                 const vat = total - (total/1.15);
+                
                 gTotal += total; tVat += vat;
 
                 body.innerHTML += `
                     <tr class="hover:bg-slate-50/50 transition">
                         <td class="p-8 font-bold text-slate-400">${new Date(row.date).toLocaleDateString()}</td>
                         <td class="p-8 font-black text-blue-900 uppercase italic tracking-tighter">${row.stationName}</td>
-                        <td class="p-8 font-black text-blue-600">${(parseFloat(row.mada)||0).toFixed(2)}</td>
+                        <td class="p-8 font-black text-blue-600">${mada.toFixed(1)}</td>
+                        <td class="p-8 font-bold text-orange-400">${visa.toFixed(1)}</td>
                         <td class="p-8 text-red-500 font-bold">-${vat.toFixed(2)}</td>
                         <td class="p-8 font-black text-slate-900">${total.toFixed(2)}</td>
                         <td class="p-8 text-center flex justify-center gap-4">
-                            <button onclick="editRow(${data.length - 1 - index})" class="text-blue-500 hover:scale-120 transition"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteRow(${data.length - 1 - index})" class="text-red-300 hover:text-red-600 transition"><i class="fas fa-trash"></i></button>
+                            <button onclick="editRow(${actualIndex})" class="text-blue-500 hover:scale-125 transition"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteRow(${actualIndex})" class="text-red-300 hover:text-red-600 transition"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
@@ -174,32 +192,38 @@
             document.getElementById('totalTax').innerText = tVat.toLocaleString() + " SR";
         }
 
-        // এন্ট্রি এবং এডিট ফাংশন
         document.getElementById('dataForm').onsubmit = async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
             const payload = {
                 date: document.getElementById('formDate').value,
                 stationName: document.getElementById('formStation').value,
                 mada: document.getElementById('formMada').value,
                 visa: document.getElementById('formVisa').value || 0,
-                rowId: document.getElementById('editRowId').value, // যদি এডিট হয়
-                action: document.getElementById('editRowId').value ? "edit" : "add"
+                index: document.getElementById('editRowId').value,
+                action: document.getElementById('editRowId').value !== '' ? "edit" : "add"
             };
 
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
             closeModal();
             loadData();
+            btn.innerText = "Save Data";
+            btn.disabled = false;
         };
 
         async function deleteRow(index) {
-            if(!confirm("Are you sure?")) return;
+            if(!confirm("Are you sure you want to delete this record?")) return;
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: index, action: "delete" }) });
             loadData();
         }
 
         function editRow(index) {
             const row = rawData[index];
-            document.getElementById('formDate').value = row.date.split('T')[0];
+            document.getElementById('modalTitle').innerText = "Edit Transaction";
+            document.getElementById('formDate').value = new Date(row.date).toISOString().split('T')[0];
             document.getElementById('formStation').value = row.stationName;
             document.getElementById('formMada').value = row.mada;
             document.getElementById('formVisa').value = row.visa;
@@ -211,18 +235,35 @@
             const last7 = data.slice(-7);
             const labels = last7.map(r => new Date(r.date).toLocaleDateString());
             const sales = last7.map(r => (parseFloat(r.mada)||0) + (parseFloat(r.visa)||0));
+            const taxes = sales.map(s => s - (s/1.15));
             
             if(salesChart) salesChart.destroy();
             salesChart = new Chart(document.getElementById('salesChart'), {
                 type: 'line', 
-                data: { labels, datasets: [{ label: 'Sales', data: sales, borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37,99,235,0.1)' }] },
-                options: { plugins: { legend: { display: false } } }
+                data: { labels, datasets: [{ label: 'Sales', data: sales, borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37,99,235,0.05)' }] },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+            });
+
+            if(taxChart) taxChart.destroy();
+            taxChart = new Chart(document.getElementById('taxChart'), {
+                type: 'bar', 
+                data: { labels, datasets: [{ label: 'VAT', data: taxes, backgroundColor: '#ef4444', borderRadius: 8 }] },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
             });
         }
 
         function toggleDarkMode() { document.body.classList.toggle('dark'); }
-        function searchStation() { /* আপনার সার্চ লজিক */ }
+        function searchStation() {
+            let input = document.getElementById("searchInput").value.toUpperCase();
+            let tr = document.getElementById("dataTable").getElementsByTagName("tr");
+            for (let i = 1; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName("td")[1];
+                if (td) tr[i].style.display = td.innerText.toUpperCase().includes(input) ? "" : "none";
+            }
+        }
+
         window.onload = loadData;
+        function logout() { localStorage.clear(); window.location.href = "index.html"; }
     </script>
 </body>
 </html>
