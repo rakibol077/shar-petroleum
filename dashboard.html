@@ -3,39 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Analytics Dashboard</title>
+    <title>Shar Petroleum - Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        
-        /* Premium Card Styles */
-        .glass-card { 
-            background: white; 
-            border-radius: 30px; 
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04);
-            border: 1px solid rgba(226, 232, 240, 0.5);
-        }
-
-        .sidebar-btn-active {
-            background: #2563eb;
-            color: white;
-            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
-        }
-
-        /* Table Style */
-        th { color: #94a3b8; font-size: 11px; letter-spacing: 0.05em; padding: 24px; }
-        td { padding: 20px 24px; font-weight: 600; color: #334155; border-bottom: 1px solid #f1f5f9; }
-        
-        /* Modal Style */
+        .glass-card { background: white; border-radius: 30px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; transition: 0.3s; }
+        .sidebar-active { background: #2563eb; color: white; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4); }
         #entryModal { display: none; }
         #entryModal.active { display: flex; }
-
-        .btn-premium {
-            transition: all 0.3s ease;
-        }
+        .btn-premium { transition: all 0.3s ease; }
         .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
     </style>
 </head>
@@ -48,17 +26,15 @@
             </div>
             <div>
                 <h1 class="text-sm font-extrabold text-blue-900 uppercase leading-none">Shar Petroleum</h1>
-                <p class="text-[10px] text-blue-400 font-bold italic">ADMIN ACCOUNT</p>
+                <p class="text-[10px] text-blue-400 font-bold italic uppercase">ADMIN ACCOUNT</p>
             </div>
         </div>
-
         <nav class="flex-1 space-y-2">
-            <button class="w-full flex items-center gap-4 px-5 py-4 sidebar-btn-active rounded-2xl font-bold text-xs uppercase transition">
+            <button class="w-full flex items-center gap-4 px-5 py-4 sidebar-active rounded-2xl font-bold text-xs uppercase transition">
                 <i class="fas fa-chart-pie text-lg"></i> Analytics Dashboard
             </button>
         </nav>
-
-        <button onclick="logout()" class="w-full py-4 bg-white border border-slate-100 text-red-500 rounded-2xl font-bold text-xs uppercase flex items-center justify-center gap-2 hover:bg-red-50 transition mt-auto">
+        <button onclick="window.location.href='index.html'" class="w-full py-4 border border-slate-100 text-red-500 rounded-2xl font-bold text-xs uppercase mt-auto hover:bg-red-50 transition flex items-center justify-center gap-2">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
     </aside>
@@ -71,78 +47,66 @@
                 <input type="text" placeholder="Search Station..." class="w-full pl-14 pr-6 py-4 bg-white rounded-full border-none outline-none text-xs font-semibold shadow-sm italic">
             </div>
             <div class="flex gap-3">
-                <button class="px-8 py-3 bg-[#00a36c] text-white rounded-full font-bold text-[10px] uppercase btn-premium">Excel</button>
-                <button class="px-8 py-3 bg-[#1e293b] text-white rounded-full font-bold text-[10px] uppercase btn-premium">Print</button>
+                <button class="px-8 py-3 bg-[#00a36c] text-white rounded-full font-bold text-[10px] uppercase shadow-md btn-premium">Excel</button>
+                <button onclick="window.print()" class="px-8 py-3 bg-[#1e293b] text-white rounded-full font-bold text-[10px] uppercase shadow-md btn-premium">Print</button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div class="glass-card p-8 text-left">
-                <p class="text-[10px] font-extrabold text-slate-400 uppercase mb-2">Gross Sales</p>
-                <h2 id="totalGross" class="text-2xl font-black text-blue-900">0 SR</h2>
-            </div>
-            <div class="glass-card p-8 text-left">
-                <p class="text-[10px] font-extrabold text-red-400 uppercase mb-2">VAT (15%)</p>
-                <h2 id="totalTax" class="text-2xl font-black text-red-500">0 SR</h2>
-            </div>
-            <div class="glass-card p-8 text-left">
-                <p class="text-[10px] font-extrabold text-green-500 uppercase mb-2">Net Profit</p>
-                <h2 id="totalNet" class="text-2xl font-black text-slate-900">0 SR</h2>
-            </div>
-            <div class="glass-card p-8 text-left">
-                <p class="text-[10px] font-extrabold text-orange-400 uppercase mb-2">Month's Tax</p>
-                <h2 class="text-2xl font-black text-orange-500">1,000 SR</h2>
-            </div>
+            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-slate-400 uppercase mb-2">Gross Sales</p><h2 id="totalGross" class="text-2xl font-black text-blue-900">0 SR</h2></div>
+            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-red-400 uppercase mb-2">VAT (15%)</p><h2 id="totalTax" class="text-2xl font-black text-red-500">0 SR</h2></div>
+            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-green-500 uppercase mb-2">Net Profit</p><h2 id="totalNet" class="text-2xl font-black text-slate-900">0 SR</h2></div>
+            <div class="glass-card p-8"><p class="text-[10px] font-extrabold text-orange-400 uppercase mb-2">Month's Tax</p><h2 class="text-2xl font-black text-orange-500">1,000 SR</h2></div>
         </div>
 
-        <div class="flex justify-between items-end mb-6 px-2">
-            <h3 class="text-2xl font-black text-slate-800 italic uppercase tracking-tighter">Transaction Records</h3>
-            <button onclick="openModal()" class="px-10 py-5 bg-[#1e3a8a] text-white rounded-[25px] font-bold text-xs uppercase shadow-xl btn-premium flex items-center gap-3">
+        <div class="flex justify-between items-end mb-6">
+            <h3 class="text-2xl font-black text-slate-800 italic uppercase">Transaction Records</h3>
+            <button onclick="openModal()" class="px-10 py-5 bg-[#1e3a8a] text-white rounded-[25px] font-bold text-xs uppercase shadow-xl flex items-center gap-3 btn-premium">
                 <i class="fas fa-plus-circle text-lg"></i> Add Entry
             </button>
         </div>
 
         <div class="glass-card overflow-hidden">
             <table class="w-full text-left">
-                <thead class="bg-slate-50/50 uppercase">
+                <thead class="bg-slate-50/50 uppercase text-[10px] text-slate-400">
                     <tr>
-                        <th>Date</th>
-                        <th>Station</th>
-                        <th class="text-slate-400">Visa</th>
-                        <th class="text-orange-300">Master</th>
-                        <th class="text-blue-600">Mada</th>
-                        <th class="text-red-400">VAT (-15%)</th>
-                        <th class="text-slate-900 font-black">Net Total</th>
-                        <th class="text-center">Actions</th>
+                        <th class="p-8">Date</th>
+                        <th class="p-8">Station</th>
+                        <th class="p-8">Visa</th>
+                        <th class="p-8 text-orange-300">Master</th>
+                        <th class="p-8 text-blue-600">Mada</th>
+                        <th class="p-8 text-red-400">VAT (-15%)</th>
+                        <th class="p-8 font-black text-slate-900">Net Total</th>
+                        <th class="p-8 text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody"></tbody>
+                <tbody id="tableBody" class="text-xs font-bold divide-y divide-slate-50"></tbody>
             </table>
         </div>
     </main>
 
     <div id="entryModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-white p-10 rounded-[40px] w-full max-w-md shadow-2xl scale-in">
-            <h2 class="text-xl font-black mb-6 uppercase italic">New Card Entry</h2>
+        <div class="bg-white p-10 rounded-[40px] w-full max-w-md shadow-2xl">
+            <h2 class="text-xl font-black mb-6 uppercase italic">New Transaction</h2>
             <form id="dataForm" class="space-y-4">
-                <input type="date" id="formDate" required class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm">
-                <input type="text" id="formStation" placeholder="Station Name" required class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm uppercase">
+                <input type="date" id="formDate" required class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none">
+                <input type="text" id="formStation" placeholder="Station Name" required class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm uppercase outline-none">
                 <div class="grid grid-cols-3 gap-3">
-                    <input type="number" step="any" id="formMada" placeholder="Mada" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm">
-                    <input type="number" step="any" id="formVisa" placeholder="Visa" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm">
-                    <input type="number" step="any" id="formMaster" placeholder="Master" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm">
+                    <input type="number" step="any" id="formMada" placeholder="Mada" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none">
+                    <input type="number" step="any" id="formVisa" placeholder="Visa" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none">
+                    <input type="number" step="any" id="formMaster" placeholder="Master" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-sm outline-none">
                 </div>
                 <div class="flex gap-4 mt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold uppercase text-xs">Cancel</button>
-                    <button type="submit" id="saveBtn" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold uppercase text-xs shadow-lg">Save Data</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold uppercase text-xs shadow-lg btn-premium">Save Data</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // আপনার নতুন স্ক্রিপ্ট URL
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyavr8WP8RHnSuH9kMtySIePFjx2Ks0f-WlfnZrQQXGBV6ovxgn9L12OI3LnmbWRSfh/exec";
+        // আপনার দেওয়া নতুন লিঙ্ক
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCcqflUOFkSEhOK7UoNJn45djoIAwmopsMPQxgyIBBp0wZ0B9uYH35eaBN5zX_T0Bl/exec";
 
         function openModal() { document.getElementById('entryModal').classList.add('active'); }
         function closeModal() { document.getElementById('entryModal').classList.remove('active'); document.getElementById('dataForm').reset(); }
@@ -152,7 +116,7 @@
                 const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
                 renderTable(data);
-            } catch(e) { console.error("Load failed"); }
+            } catch(e) { console.error("Loading Error"); }
         }
 
         function renderTable(data) {
@@ -174,17 +138,16 @@
 
                 body.innerHTML += `
                     <tr>
-                        <td class="text-slate-400 text-xs">${new Date(row.date).toLocaleDateString()}</td>
-                        <td class="text-blue-900 font-black uppercase text-xs tracking-tighter">${row.stationName}</td>
-                        <td class="text-slate-400 font-medium">${v.toFixed(2)}</td>
-                        <td class="text-orange-300 font-medium">${ms.toFixed(2)}</td>
-                        <td class="text-blue-600 font-black">${m.toFixed(2)}</td>
-                        <td class="text-red-400 font-bold">-${vat.toFixed(2)}</td>
-                        <td class="font-black text-slate-900">${net.toFixed(2)}</td>
-                        <td class="text-center">
-                            <div class="flex justify-center gap-3">
-                                <button class="text-blue-400 hover:text-blue-600"><i class="fas fa-edit"></i></button>
-                                <button onclick="deleteRow(${actualIndex})" class="text-red-200 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
+                        <td class="p-8 text-slate-400">${new Date(row.date).toLocaleDateString()}</td>
+                        <td class="p-8 text-blue-900 font-black uppercase tracking-tighter">${row.stationName}</td>
+                        <td class="p-8 text-slate-400">${v.toFixed(2)}</td>
+                        <td class="p-8 text-orange-300">${ms.toFixed(2)}</td>
+                        <td class="p-8 text-blue-600 font-black">${m.toFixed(2)}</td>
+                        <td class="p-8 text-red-400">-${vat.toFixed(2)}</td>
+                        <td class="p-8 text-slate-900 font-black">${net.toFixed(2)}</td>
+                        <td class="p-8 text-center">
+                            <div class="flex justify-center gap-4">
+                                <button onclick="deleteRow(${actualIndex})" class="text-red-200 hover:text-red-500 transition"><i class="fas fa-trash-alt"></i></button>
                             </div>
                         </td>
                     </tr>`;
@@ -202,30 +165,38 @@
 
             const payload = {
                 date: document.getElementById('formDate').value,
-                stationName: document.getElementById('formStation').value,
-                mada: document.getElementById('formMada').value || 0,
-                visa: document.getElementById('formVisa').value || 0,
-                master: document.getElementById('formMaster').value || 0,
+                stationName: document.getElementById('formStation').value.toUpperCase(),
+                mada: Number(document.getElementById('formMada').value) || 0,
+                visa: Number(document.getElementById('formVisa').value) || 0,
+                master: Number(document.getElementById('formMaster').value) || 0,
                 action: "add"
             };
 
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            
-            setTimeout(() => {
-                closeModal();
-                loadData();
-                btn.innerText = "Save Data"; btn.disabled = false;
-            }, 1500);
+            // সরাসরি POST রিকোয়েস্ট (Save fix)
+            fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify(payload),
+                mode: 'no-cors' 
+            }).then(() => {
+                setTimeout(() => {
+                    closeModal();
+                    loadData();
+                    btn.innerText = "Save Data"; btn.disabled = false;
+                }, 1500);
+            });
         };
 
         async function deleteRow(idx) {
             if(!confirm("Delete this entry?")) return;
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ index: idx, action: "delete" }) });
+            await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ index: idx, action: "delete" }),
+                mode: 'no-cors'
+            });
             setTimeout(loadData, 1000);
         }
 
         window.onload = loadData;
-        function logout() { window.location.href = "index.html"; }
     </script>
 </body>
 </html>
