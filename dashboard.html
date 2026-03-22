@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Card Management</title>
+    <title>Shar Petroleum - Management Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -23,11 +23,11 @@
     <aside class="w-80 bg-white border-r border-slate-50 flex flex-col p-8 no-print">
         <div class="flex items-center gap-4 mb-12">
             <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg text-white">
-                <i class="fas fa-credit-card text-xl"></i>
+                <i class="fas fa-droplet text-xl"></i>
             </div>
             <div>
                 <h1 class="text-sm font-extrabold uppercase text-blue-900 tracking-tighter">Shar Petroleum</h1>
-                <p class="text-[10px] font-bold text-slate-400 uppercase italic">Card Analytics</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase italic">Admin Panel</p>
             </div>
         </div>
         <nav class="flex-1 space-y-4">
@@ -38,7 +38,7 @@
                 <i id="modeIcon" class="fas fa-moon text-blue-500"></i> <span id="modeText">NIGHT MODE</span>
             </button>
         </nav>
-        <button onclick="logout()" class="w-full py-5 bg-slate-50 text-red-500 rounded-[25px] font-extrabold text-[11px] uppercase tracking-widest hover:bg-red-50">
+        <button onclick="logout()" class="w-full py-5 bg-slate-50 text-red-500 rounded-[25px] font-extrabold text-[11px] uppercase tracking-widest hover:bg-red-50 transition">
             <i class="fas fa-power-off mr-2"></i> LOGOUT
         </button>
     </aside>
@@ -60,7 +60,7 @@
         </div>
 
         <div class="flex justify-between items-center mb-10">
-            <h3 class="text-xl font-extrabold text-slate-900 italic uppercase tracking-tighter">Card Transactions</h3>
+            <h3 class="text-xl font-extrabold text-slate-900 italic uppercase">Transaction Logs</h3>
             <button onclick="openModal()" class="bg-blue-900 text-white px-10 py-5 rounded-[25px] font-bold text-xs uppercase shadow-2xl hover:scale-105 transition">
                 <i class="fas fa-plus mr-2"></i> Add Entry
             </button>
@@ -88,9 +88,8 @@
 
     <div id="entryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="bg-white p-10 rounded-[40px] w-full max-w-md shadow-2xl">
-            <h2 class="text-xl font-black mb-6 uppercase tracking-tighter">New Card Record</h2>
+            <h2 class="text-xl font-black mb-6 uppercase tracking-tighter">Record Card Sales</h2>
             <form id="dataForm" class="space-y-4">
-                <input type="hidden" id="editRowId">
                 <input type="date" id="formDate" required class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm">
                 <input type="text" id="formStation" placeholder="Station Name" required class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm uppercase">
                 <div class="grid grid-cols-3 gap-3">
@@ -107,16 +106,18 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMgKCcU-BGQoeI1jSnV8xSU8neDiV9yuF2Q0B2AHV1vAblIn1rNa__oCkeMbNgcrS/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6KKNxsKijGM5NmiLt1Ye-fBwq0xT3YPNEnmsNlMoPlY1A_hdoGTwAAPWGN_rZwqR1/exec";
         let rawData = [];
 
         function openModal() { document.getElementById('entryModal').classList.add('active'); }
         function closeModal() { document.getElementById('entryModal').classList.remove('active'); document.getElementById('dataForm').reset(); }
 
         async function loadData() {
-            const res = await fetch(SCRIPT_URL);
-            rawData = await res.json();
-            renderTable(rawData);
+            try {
+                const res = await fetch(SCRIPT_URL);
+                rawData = await res.json();
+                renderTable(rawData);
+            } catch(e) { console.error("Load failed"); }
         }
 
         function renderTable(data) {
@@ -159,8 +160,9 @@
         document.getElementById('dataForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
-            btn.innerText = "Saving Card Data...";
-            
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
             const payload = {
                 date: document.getElementById('formDate').value,
                 stationName: document.getElementById('formStation').value,
@@ -170,21 +172,23 @@
                 action: "add"
             };
 
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            closeModal();
-            loadData();
-            btn.innerText = "Save Data";
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            
+            setTimeout(() => {
+                closeModal();
+                loadData();
+                btn.innerText = "Save Data";
+                btn.disabled = false;
+            }, 1500);
         };
 
         async function deleteRow(index) {
-            if(!confirm("Delete this card record?")) return;
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: index, action: "delete" }) });
-            loadData();
+            if(!confirm("Delete this record?")) return;
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ index: index, action: "delete" }) });
+            setTimeout(loadData, 1000);
         }
 
-        function toggleDarkMode() { document.body.classList.toggle('dark'); }
         window.onload = loadData;
-        function logout() { localStorage.clear(); window.location.href = "index.html"; }
     </script>
 </body>
 </html>
