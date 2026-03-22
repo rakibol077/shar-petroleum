@@ -3,163 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Analytics Dashboard</title>
+    <title>Shar Petroleum - Management Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .sidebar { width: 260px; background: white; border-right: 1px solid #e2e8f0; height: 100vh; position: fixed; }
-        main { margin-left: 260px; width: calc(100% - 260px); }
-        #entryModal { display: none; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); }
-        .admin-only { display: none; } /* ডিফল্টভাবে লুকানো */
-        @media print { .no-print { display: none; } main { margin-left: 0; width: 100%; } }
-    </style>
 </head>
-<body class="flex">
+<body class="bg-slate-50 flex h-screen overflow-hidden text-slate-800">
 
-    <aside class="sidebar no-print flex flex-col shadow-sm">
+    <aside class="w-64 bg-white border-r flex flex-col no-print shadow-sm">
         <div class="p-8 border-b flex items-center space-x-3">
             <i class="fas fa-droplet text-blue-600 text-3xl"></i>
             <div>
-                <h1 class="text-blue-900 font-black text-xs leading-none uppercase">Shar Petroleum</h1>
-                <span id="userBadge" class="text-[8px] bg-blue-50 text-blue-500 px-2 py-0.5 rounded font-bold uppercase mt-1 inline-block italic">Syncing...</span>
+                <h1 class="text-blue-900 font-black text-xs uppercase leading-none">Shar Petroleum</h1>
+                <span id="roleBadge" class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1 inline-block italic">Checking...</span>
             </div>
         </div>
-        <nav class="flex-1 py-8 px-4 space-y-3">
-            <div class="bg-blue-600 text-white p-3.5 flex items-center space-x-3 rounded-2xl shadow-lg cursor-pointer text-xs font-bold uppercase tracking-wider">
-                <i class="fas fa-chart-line"></i> <span>Live Analytics</span>
+        <nav class="flex-1 p-5">
+            <div class="bg-blue-600 text-white p-4 rounded-2xl text-xs font-black uppercase shadow-lg shadow-blue-100">
+                <i class="fas fa-chart-line mr-2"></i> Analytics Dashboard
             </div>
         </nav>
         <div class="p-6 border-t">
-            <button onclick="logout()" class="w-full p-4 text-red-500 font-black text-[10px] uppercase hover:bg-red-50 rounded-2xl transition border border-red-100">
-                <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+            <button onclick="logout()" class="w-full p-4 text-red-500 font-black text-[10px] uppercase border border-red-50 hover:bg-red-50 rounded-2xl transition">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
             </button>
         </div>
     </aside>
 
-    <main class="flex flex-col min-h-screen">
-        <header class="bg-white no-print h-20 border-b flex items-center justify-between px-10 shadow-sm sticky top-0 z-10">
-            <div class="flex items-center space-x-6">
+    <main class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white h-20 border-b flex items-center justify-between px-10 no-print sticky top-0 z-10">
+            <div class="flex items-center space-x-4">
                 <div class="relative">
                     <i class="fas fa-search absolute left-4 top-3 text-gray-300 text-xs"></i>
-                    <input type="text" id="searchBox" onkeyup="filterData()" placeholder="Search Station..." class="bg-gray-50 border border-gray-100 rounded-full pl-10 pr-4 py-2.5 text-xs w-64 outline-none focus:ring-2 ring-blue-100">
+                    <input type="text" id="searchBox" onkeyup="filterData()" placeholder="Search Station..." class="bg-gray-50 border border-gray-100 rounded-full pl-10 pr-4 py-2.5 text-xs outline-none w-64 focus:ring-2 ring-blue-50 transition">
                 </div>
-                <input type="date" id="dateFilter" onchange="filterData()" class="bg-gray-50 border border-gray-100 rounded-full px-5 py-2 text-xs outline-none focus:ring-2 ring-blue-100">
             </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase transition flex items-center space-x-2">
-                    <i class="fas fa-file-excel"></i> <span>Excel</span>
-                </button>
-                <button onclick="window.print()" class="bg-slate-800 hover:bg-black text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase transition flex items-center space-x-2">
-                    <i class="fas fa-print"></i> <span>Print</span>
-                </button>
+            <div class="flex space-x-3">
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition shadow-md">Excel</button>
+                <button onclick="window.print()" class="bg-slate-800 hover:bg-black text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase transition shadow-md">Print</button>
             </div>
         </header>
 
         <div class="p-10">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-gray-50">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Gross Card Sales</p>
-                    <h2 id="totalGross" class="text-2xl font-black text-blue-900">0.00 SR</h2>
+                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-gray-100">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Gross Sales</p>
+                    <h2 id="totalGross" class="text-2xl font-black text-blue-900 mt-1">0.00 SR</h2>
                 </div>
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-gray-50">
-                    <p class="text-[9px] font-black text-red-400 uppercase tracking-widest mb-1">Total VAT Paid</p>
-                    <h2 id="totalVatSum" class="text-2xl font-black text-red-500">0.00 SR</h2>
+                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-gray-100">
+                    <p class="text-[9px] font-black text-red-400 uppercase tracking-widest">VAT (15%)</p>
+                    <h2 id="totalVatSum" class="text-2xl font-black text-red-500 mt-1">0.00 SR</h2>
                 </div>
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-emerald-50 bg-emerald-50/10">
-                    <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Net Income (1.15)</p>
-                    <h2 id="totalNetSum" class="text-2xl font-black text-slate-900">0.00 SR</h2>
+                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-emerald-50 bg-emerald-50/20">
+                    <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Net Profit</p>
+                    <h2 id="totalNetSum" class="text-2xl font-black text-slate-900 mt-1">0.00 SR</h2>
                 </div>
-                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-amber-50 bg-amber-50/10">
-                    <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1 italic text-center">Month's Tax</p>
-                    <h2 id="monthlyTaxSum" class="text-2xl font-black text-amber-700 text-center">0.00 SR</h2>
+                <div class="bg-white p-7 rounded-[32px] shadow-sm border border-amber-50 bg-amber-50/20">
+                    <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest italic">Month's Tax</p>
+                    <h2 id="monthlyTaxSum" class="text-2xl font-black text-amber-700 mt-1">0.00 SR</h2>
                 </div>
             </div>
 
-            <div class="bg-white p-8 rounded-[40px] shadow-sm border border-gray-50 mb-10 no-print">
-                <h3 class="text-[10px] font-black text-gray-400 uppercase mb-6 tracking-[0.2em] flex items-center">
-                    <i class="fas fa-chart-bar mr-2 text-blue-500"></i> Annual Revenue & Tax Analytics
-                </h3>
-                <canvas id="yearlyChart" height="90"></canvas>
-            </div>
-
-            <div class="flex justify-between items-end mb-8">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter">Transaction Ledger</h1>
-                    <p class="text-xs text-gray-400 font-bold uppercase mt-1">Real-time Cloud Sync Active</p>
-                </div>
-                <button onclick="toggleModal()" id="addBtn" class="admin-only bg-blue-900 hover:bg-black text-white px-8 py-4 rounded-2xl font-black text-[10px] shadow-2xl transition-all uppercase tracking-widest flex items-center space-x-3">
-                    <i class="fas fa-plus-circle text-sm"></i> <span>Add New Entry</span>
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Transaction Records</h1>
+                <button onclick="openAddModal()" id="addBtn" class="bg-blue-900 hover:bg-black text-white px-8 py-4 rounded-2xl font-black text-[11px] uppercase shadow-2xl transition hidden">
+                    <i class="fas fa-plus-circle mr-2"></i> Add Entry
                 </button>
             </div>
 
-            <div class="bg-white rounded-[35px] border border-gray-50 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-[40px] border border-gray-50 shadow-sm overflow-hidden mb-10">
                 <table class="w-full text-left text-[11px] border-collapse" id="reportTable">
                     <thead class="bg-slate-50 text-slate-400 font-black uppercase text-[9px] border-b">
                         <tr>
                             <th class="p-6">Date</th>
-                            <th class="p-6">Station Name</th>
+                            <th class="p-6">Station</th>
                             <th class="p-6">Visa</th>
                             <th class="p-6">Master</th>
-                            <th class="p-6">Mada</th>
+                            <th class="p-6 text-blue-600">Mada</th>
                             <th class="p-6 text-red-400">VAT (-15%)</th>
-                            <th class="p-6 text-slate-900 bg-slate-100/30">Net Amount</th>
-                            <th class="p-6 admin-only text-center">Action</th>
+                            <th class="p-6 text-slate-900 bg-slate-50">Net Total</th>
+                            <th class="p-6 text-center admin-only hidden">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50" id="tableBody">
-                        <tr><td colspan="8" class="p-20 text-center text-gray-300 italic font-bold">Syncing with Google Sheets...</td></tr>
+                        <tr><td colspan="8" class="p-20 text-center text-gray-300 font-bold italic uppercase tracking-widest">Connecting to Cloud...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <div id="entryModal" class="fixed inset-0 flex items-center justify-center z-[100] p-6">
-        <div class="bg-white rounded-[45px] w-full max-w-md shadow-2xl p-10 border border-blue-50">
-            <div class="text-center mb-8">
-                <i class="fas fa-file-invoice-dollar text-blue-600 text-4xl mb-3"></i>
-                <h3 class="font-black text-slate-800 uppercase text-sm tracking-widest italic">New Card Transaction</h3>
-            </div>
+    <div id="entryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[100] p-6">
+        <div class="bg-white rounded-[45px] w-full max-w-md p-10 shadow-2xl">
+            <h3 id="modalTitle" class="font-black text-slate-800 uppercase text-sm mb-8 text-center italic tracking-widest">New Entry</h3>
             <form onsubmit="event.preventDefault(); addData();" class="space-y-4">
-                <input type="text" id="sName" class="w-full p-4 border rounded-2xl bg-gray-50 text-sm outline-none focus:ring-2 ring-blue-50" placeholder="Station Name" required>
+                <input type="text" id="sName" class="w-full p-4 border rounded-2xl bg-gray-50 text-sm outline-none focus:ring-2 ring-blue-50 transition" placeholder="Station Name" required>
                 <div class="grid grid-cols-1 gap-3">
-                    <input type="number" id="sVisa" placeholder="Visa Card Amount" class="w-full p-4 border rounded-2xl bg-blue-50/30 text-sm outline-none" step="0.01">
-                    <input type="number" id="sMaster" placeholder="Master Card Amount" class="w-full p-4 border rounded-2xl bg-orange-50/30 text-sm outline-none" step="0.01">
-                    <input type="number" id="sMada" placeholder="Mada Card Amount" class="w-full p-4 border rounded-2xl bg-green-50/30 text-sm outline-none font-bold text-green-700" step="0.01">
+                    <input type="number" id="sVisa" placeholder="Visa Card Sales" class="w-full p-4 border rounded-2xl bg-blue-50/20 text-sm outline-none" step="0.01">
+                    <input type="number" id="sMaster" placeholder="Master Card Sales" class="w-full p-4 border rounded-2xl bg-orange-50/20 text-sm outline-none" step="0.01">
+                    <input type="number" id="sMada" placeholder="Mada Card Sales" class="w-full p-4 border rounded-2xl bg-green-50/20 text-sm font-bold outline-none text-green-700" step="0.01">
                 </div>
-                <div class="flex space-x-3 pt-4">
-                    <button type="button" onclick="toggleModal()" class="w-1/3 bg-gray-100 text-gray-400 font-black py-4 rounded-2xl uppercase text-[9px]">Cancel</button>
-                    <button type="submit" id="saveBtn" class="w-2/3 bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-black uppercase text-[10px] tracking-widest">Upload & Sync</button>
+                <div class="flex space-x-3 pt-6">
+                    <button type="button" onclick="toggleModal()" class="w-1/3 bg-gray-100 text-gray-400 font-black py-4 rounded-2xl uppercase text-[9px] tracking-widest">Cancel</button>
+                    <button type="submit" id="saveBtn" class="w-2/3 bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-black transition-all uppercase text-[10px] tracking-widest">Sync to Cloud</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // আপনার গুগল অ্যাপ স্ক্রিপ্ট ইউআরএল এখানে দিন
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw8lyzJB0rOcLkcH0V5V3hC08XHe3ASHTKfee9GW9OqzzkF9I_Df2BHe8qqqfZAo-M/exec";
+        // আপনার নতুন আপডেট করা ইউআরএল
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFPo_zvUOlXxdLqpw8ZYMzVsjjUM6OFlLcKdgLMgtKn-DOdQGSjcINjovxP-pGzGVU/exec"; 
+        
         let allData = [];
-        let yearlyChart;
+        let editMode = false;
+        let editId = null;
 
-        // নিরাপত্তা কন্ট্রোল
         function applySecurity() {
             const role = localStorage.getItem('userRole');
-            const userBadge = document.getElementById('userBadge');
-            const addBtn = document.getElementById('addBtn');
-            const adminElements = document.querySelectorAll('.admin-only');
-
+            const roleBadge = document.getElementById('roleBadge');
             if (role === 'admin') {
-                userBadge.innerText = "Admin Account (Full)";
-                userBadge.className = "text-[8px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded font-bold uppercase italic mt-1 inline-block";
-                if(addBtn) addBtn.style.display = 'flex';
-                adminElements.forEach(el => el.style.display = 'table-cell');
+                roleBadge.innerText = "Admin Account";
+                roleBadge.classList.replace('text-gray-400', 'text-blue-500');
+                document.getElementById('addBtn').classList.remove('hidden');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
             } else {
-                userBadge.innerText = "Staff (Read Only)";
-                userBadge.className = "text-[8px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded font-bold uppercase mt-1 inline-block";
-                if(addBtn) addBtn.style.display = 'none';
-                adminElements.forEach(el => el.style.display = 'none');
+                roleBadge.innerText = "Viewer Mode (Read Only)";
             }
         }
 
@@ -168,8 +137,9 @@
                 const response = await fetch(SCRIPT_URL);
                 allData = await response.json();
                 renderTable(allData);
-                updateYearlyChart(allData);
-            } catch (error) { console.error("Data Sync Failed"); }
+            } catch (error) { 
+                console.error("Cloud Error"); 
+            }
         }
 
         function renderTable(dataList) {
@@ -181,108 +151,109 @@
 
             dataList.slice().reverse().forEach(row => {
                 const rDate = new Date(row.date);
-                const visa = parseFloat(row.visa || 0), master = parseFloat(row.master || 0), mada = parseFloat(row.mada || 0);
+                const v = parseFloat(row.visa || 0), m = parseFloat(row.master || 0), md = parseFloat(row.mada || 0);
                 const vat = parseFloat(row.vatAmount || 0), net = parseFloat(row.totalAmount || 0);
                 
-                gSum += (visa + master + mada); vSum += vat; nSum += net;
+                gSum += (v + m + md); vSum += vat; nSum += net;
                 if(rDate.getMonth() === now.getMonth() && rDate.getFullYear() === now.getFullYear()) mTax += vat;
 
-                let actionHtml = (role === 'admin') ? `<td class="p-6 text-center"><button class="text-red-300 hover:text-red-600 transition"><i class="fas fa-trash-alt"></i></button></td>` : '';
+                let actionHtml = (role === 'admin') ? `
+                    <td class="p-6 text-center space-x-3 admin-only">
+                        <button onclick="openEditModal('${row.id}', '${row.stationName}', ${v}, ${m}, ${md})" class="text-blue-400 hover:text-blue-600 transition">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteRow('${row.id}')" class="text-red-300 hover:text-red-500 transition">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>` : '';
 
                 tableBody.innerHTML += `
                     <tr class="hover:bg-blue-50/40 transition border-b border-gray-50">
                         <td class="p-6 text-gray-400 font-medium">${rDate.toLocaleDateString()}</td>
                         <td class="p-6 font-black text-blue-900 uppercase">${row.stationName}</td>
-                        <td class="p-6 font-medium text-slate-500">${visa.toFixed(2)}</td>
-                        <td class="p-6 font-medium text-orange-500">${master.toFixed(2)}</td>
-                        <td class="p-6 font-black text-blue-600">${mada.toFixed(2)}</td>
+                        <td class="p-6">${v.toFixed(2)}</td>
+                        <td class="p-6 text-orange-500">${m.toFixed(2)}</td>
+                        <td class="p-6 font-black text-blue-600">${md.toFixed(2)}</td>
                         <td class="p-6 text-red-500 font-bold italic">-${vat.toFixed(2)}</td>
                         <td class="p-6 font-black text-slate-900 bg-slate-50/50">${net.toFixed(2)}</td>
                         ${actionHtml}
                     </tr>`;
             });
-
             document.getElementById('totalGross').innerText = gSum.toLocaleString() + " SR";
             document.getElementById('totalVatSum').innerText = vSum.toLocaleString() + " SR";
             document.getElementById('totalNetSum').innerText = nSum.toLocaleString() + " SR";
             document.getElementById('monthlyTaxSum').innerText = mTax.toLocaleString() + " SR";
         }
 
-        function updateYearlyChart(data) {
-            const monthlyTax = Array(12).fill(0), monthlyNet = Array(12).fill(0);
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-            data.forEach(d => {
-                const month = new Date(d.date).getMonth();
-                monthlyTax[month] += parseFloat(d.vatAmount || 0);
-                monthlyNet[month] += parseFloat(d.totalAmount || 0);
-            });
-
-            if (yearlyChart) yearlyChart.destroy();
-            const ctx = document.getElementById('yearlyChart').getContext('2d');
-            yearlyChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [
-                        { label: 'Net Profit', data: monthlyNet, backgroundColor: '#1e3a8a', borderRadius: 12 },
-                        { label: 'Tax Deducted', data: monthlyTax, backgroundColor: '#ef4444', borderRadius: 12 }
-                    ]
-                },
-                options: { 
-                    responsive: true, 
-                    plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 } } } },
-                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
-                }
-            });
+        function openAddModal() {
+            editMode = false; editId = null;
+            document.getElementById('modalTitle').innerText = "New Transaction";
+            document.getElementById('saveBtn').innerText = "Sync to Cloud";
+            document.querySelectorAll('input').forEach(i => i.value = "");
+            toggleModal();
         }
 
-        function filterData() {
-            const term = document.getElementById('searchBox').value.toLowerCase();
-            const date = document.getElementById('dateFilter').value;
-            const filtered = allData.filter(item => {
-                const sMatch = item.stationName.toLowerCase().includes(term);
-                const iDate = new Date(item.date).toISOString().split('T')[0];
-                return sMatch && (date === "" || iDate === date);
-            });
-            renderTable(filtered);
-        }
-
-        function toggleModal() {
-            const modal = document.getElementById('entryModal');
-            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = "index.html";
-        }
-
-        function exportToExcel() {
-            let table = document.getElementById("reportTable");
-            let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML);
-            let link = document.createElement('a');
-            link.download = 'Shar_Petroleum_Report.xls'; link.href = url; link.click();
+        function openEditModal(id, name, v, m, md) {
+            editMode = true; editId = id;
+            document.getElementById('modalTitle').innerText = "Update Record";
+            document.getElementById('saveBtn').innerText = "Apply Changes";
+            document.getElementById('sName').value = name;
+            document.getElementById('sVisa').value = v;
+            document.getElementById('sMaster').value = m;
+            document.getElementById('sMada').value = md;
+            toggleModal();
         }
 
         async function addData() {
             const btn = document.getElementById('saveBtn');
             const v = parseFloat(document.getElementById('sVisa').value) || 0, m = parseFloat(document.getElementById('sMaster').value) || 0, md = parseFloat(document.getElementById('sMada').value) || 0;
             const total = v + m + md, net = (total / 1.15).toFixed(2), vat = (total - net).toFixed(2);
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
             
-            const payload = { stationName: document.getElementById('sName').value, salesAmount: 0, visa: v, master: m, mada: md, vatAmount: vat, totalAmount: net };
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNCING...';
+            
+            const payload = { 
+                action: editMode ? "edit" : "add", 
+                id: editId, 
+                stationName: document.getElementById('sName').value, 
+                visa: v, master: m, mada: md, vatAmount: vat, totalAmount: net 
+            };
+
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            
             toggleModal(); loadData();
-            btn.disabled = false; btn.innerHTML = 'Upload & Sync';
-            document.querySelectorAll('input').forEach(i => i.value = "");
+            btn.disabled = false;
+        }
+
+        async function deleteRow(id) {
+            if (!confirm("Are you sure you want to delete this record forever?")) return;
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
+            loadData();
+        }
+
+        function toggleModal() { 
+            const m = document.getElementById('entryModal');
+            m.classList.toggle('hidden'); m.classList.toggle('flex');
+        }
+
+        function logout() { localStorage.clear(); window.location.href = "index.html"; }
+
+        function filterData() {
+            const term = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = allData.filter(item => item.stationName.toLowerCase().includes(term));
+            renderTable(filtered);
+        }
+
+        function exportToExcel() {
+            let table = document.getElementById("reportTable");
+            let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML);
+            let link = document.createElement('a');
+            link.download = 'Shar_Report_' + new Date().toLocaleDateString() + '.xls'; 
+            link.href = url; link.click();
         }
 
         window.onload = () => {
             if(!localStorage.getItem('userRole')) window.location.href = "index.html";
-            applySecurity();
-            loadData();
+            applySecurity(); loadData();
         };
     </script>
 </body>
