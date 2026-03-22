@@ -1,73 +1,101 @@
-<script>
-    // এই লিঙ্কটি আপনার গুগল স্ক্রিপ্ট থেকে আসা নতুন লিঙ্ক
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtkGvsL_IaxaKvJ2a8pIq_rxaKxBtC04Z6-g2s5kcfXeHlzc_Fw6BHLoCs9BmKo8G8/exec";
-    let cachedData = [];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shar Petroleum - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: white; border-radius: 30px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
+        #entryModal { display: none; }
+        #entryModal.active { display: flex; }
+    </style>
+</head>
+<body class="flex min-h-screen">
 
-    async function loadData() {
-        try {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            cachedData = data;
-            renderTable(data);
-        } catch(e) { console.error("Data Load Error!"); }
-    }
+    <aside class="w-72 bg-white border-r border-slate-100 flex flex-col p-6 fixed h-full text-center">
+        <div class="mb-12">
+            <h1 class="text-sm font-extrabold text-blue-900 uppercase">Shar Petroleum</h1>
+            <p class="text-[10px] text-blue-400 font-bold italic uppercase">Admin Dashboard</p>
+        </div>
+        <nav class="flex-1">
+            <button class="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-xs uppercase shadow-lg">Analytics Dashboard</button>
+        </nav>
+    </aside>
 
-    function renderTable(data) {
-        const body = document.getElementById('tableBody');
-        body.innerHTML = "";
-        let gTotal=0, tVat=0, tNet=0;
+    <main class="flex-1 ml-72 p-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="glass-card p-8 text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Gross Sales</p><h2 id="totalGross" class="text-2xl font-black text-blue-900">0.00 SR</h2></div>
+            <div class="glass-card p-8 text-center"><p class="text-[10px] font-bold text-red-400 uppercase">VAT (15%)</p><h2 id="totalTax" class="text-2xl font-black text-red-500">0.00 SR</h2></div>
+            <div class="glass-card p-8 text-center"><p class="text-[10px] font-bold text-green-500 uppercase">Net Profit</p><h2 id="totalNet" class="text-2xl font-black text-slate-900">0.00 SR</h2></div>
+        </div>
 
-        data.slice().reverse().forEach((row, index) => {
-            const actualIndex = data.length - 1 - index;
-            
-            // আপনার নতুন শিট অনুযায়ী ডাটা ধরা (stationname, mada, visa, master)
-            const m = parseFloat(row.mada || 0);
-            const v = parseFloat(row.visa || 0);
-            const ms = parseFloat(row.master || 0);
-            const sName = row.stationname || "N/A";
-            const dStr = row.date ? new Date(row.date).toLocaleDateString('en-GB') : "---";
+        <div class="glass-card overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 uppercase text-[10px] text-slate-400">
+                    <tr>
+                        <th class="p-8">Date</th>
+                        <th class="p-8">Station</th>
+                        <th class="p-8">Visa</th>
+                        <th class="p-8">Master</th>
+                        <th class="p-8 text-blue-600">Mada</th>
+                        <th class="p-8 text-red-400">VAT</th>
+                        <th class="p-8 font-black">Net Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="text-xs font-bold divide-y divide-slate-50"></tbody>
+            </table>
+        </div>
+    </main>
 
-            const gross = m + v + ms;
-            const net = gross / 1.15;
-            const vat = gross - net;
-            
-            gTotal += gross; tVat += vat; tNet += net;
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtkGvsL_IaxaKvJ2a8pIq_rxaKxBtC04Z6-g2s5kcfXeHlzc_Fw6BHLoCs9BmKo8G8/exec";
 
-            body.innerHTML += `
-                <tr class="hover:bg-slate-50 border-b border-slate-50 transition">
-                    <td class="p-8 text-slate-400 font-medium">${dStr}</td>
-                    <td class="p-8 text-blue-900 font-black uppercase italic">${sName}</td>
-                    <td class="p-8 text-slate-500">${v.toFixed(2)}</td>
-                    <td class="p-8 text-orange-400">${ms.toFixed(2)}</td>
-                    <td class="p-8 text-blue-600 font-black">${m.toFixed(2)}</td>
-                    <td class="p-8 text-red-400">-${vat.toFixed(2)}</td>
-                    <td class="p-8 text-slate-900 font-extrabold">${net.toFixed(2)}</td>
-                    <td class="p-8 text-center flex justify-center gap-3">
-                        <button onclick="openModal(${actualIndex})" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
-                    </td>
-                </tr>`;
-        });
-        
-        document.getElementById('totalGross').innerText = gTotal.toFixed(2) + " SR";
-        document.getElementById('totalTax').innerText = tVat.toFixed(2) + " SR";
-        document.getElementById('totalNet').innerText = tNet.toFixed(2) + " SR";
-    }
-
-    window.onload = loadData;
-
-    // মডেল ওপেন করার ফাংশন (যাতে এডিট করা যায়)
-    function openModal(idx = null) {
-        const modal = document.getElementById('entryModal');
-        modal.classList.add('active');
-        if(idx !== null) {
-            const r = cachedData[idx];
-            document.getElementById('editIndex').value = idx;
-            document.getElementById('formDate').value = r.date ? new Date(r.date).toISOString().split('T')[0] : "";
-            document.getElementById('formStation').value = r.stationname || "";
-            document.getElementById('formMada').value = r.mada || 0;
-            document.getElementById('formVisa').value = r.visa || 0;
-            document.getElementById('formMaster').value = r.master || 0;
+        async function loadData() {
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
+                renderTable(data);
+            } catch(e) { console.log("Failed to load"); }
         }
-    }
-    function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
-</script>
+
+        function renderTable(data) {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            let gTotal=0, tVat=0, tNet=0;
+
+            data.slice().reverse().forEach(row => {
+                const m = parseFloat(row.mada || 0);
+                const v = parseFloat(row.visa || 0);
+                const ms = parseFloat(row.master || 0);
+                const sName = row.stationname || "N/A";
+                const dStr = row.date ? new Date(row.date).toLocaleDateString() : "---";
+
+                const gross = m + v + ms;
+                const net = gross / 1.15;
+                const vat = gross - net;
+                
+                gTotal += gross; tVat += vat; tNet += net;
+
+                body.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-8 text-slate-400">${dStr}</td>
+                        <td class="p-8 text-blue-900 font-black uppercase italic">${sName}</td>
+                        <td class="p-8">${v.toFixed(2)}</td>
+                        <td class="p-8">${ms.toFixed(2)}</td>
+                        <td class="p-8 text-blue-600">${m.toFixed(2)}</td>
+                        <td class="p-8 text-red-400">-${vat.toFixed(2)}</td>
+                        <td class="p-8 text-slate-900 font-extrabold">${net.toFixed(2)}</td>
+                    </tr>`;
+            });
+            document.getElementById('totalGross').innerText = gTotal.toFixed(2) + " SR";
+            document.getElementById('totalTax').innerText = tVat.toFixed(2) + " SR";
+            document.getElementById('totalNet').innerText = tNet.toFixed(2) + " SR";
+        }
+        window.onload = loadData;
+    </script>
+</body>
+</html>
