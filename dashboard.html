@@ -2,36 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shar Petroleum - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .card { background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 20px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0f4f8; }
+        .glass-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
     </style>
 </head>
-<body class="p-10">
+<body class="p-5 md:p-10">
 
     <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-black text-blue-900 mb-10 italic uppercase">Shar Petroleum Dashboard</h1>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="card"><p class="text-xs font-bold text-slate-400 uppercase">Gross Sales</p><h2 id="totalGross" class="text-2xl font-black">0.00 SR</h2></div>
-            <div class="card"><p class="text-xs font-bold text-red-400 uppercase">VAT (15%)</p><h2 id="totalTax" class="text-2xl font-black text-red-500">0.00 SR</h2></div>
-            <div class="card"><p class="text-xs font-bold text-green-500 uppercase">Net Profit</p><h2 id="totalNet" class="text-2xl font-black text-slate-900">0.00 SR</h2></div>
+        <div class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-2xl font-black text-blue-900 uppercase italic">Shar Petroleum</h1>
+                <p class="text-xs text-blue-400 font-bold uppercase tracking-widest">Live Dashboard</p>
+            </div>
+            <button onclick="location.reload()" class="p-3 bg-white rounded-full shadow-sm hover:shadow-md transition">
+                <i class="fas fa-sync-alt text-blue-600"></i>
+            </button>
         </div>
 
-        <div class="card overflow-hidden p-0">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="glass-card p-6 border-l-4 border-blue-600">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Gross Sales</p>
+                <h2 id="totalGross" class="text-2xl font-black text-slate-800">0.00 SR</h2>
+            </div>
+            <div class="glass-card p-6 border-l-4 border-red-500">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Total VAT (15%)</p>
+                <h2 id="totalTax" class="text-2xl font-black text-red-600">0.00 SR</h2>
+            </div>
+            <div class="glass-card p-6 border-l-4 border-green-500">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Net Amount</p>
+                <h2 id="totalNet" class="text-2xl font-black text-green-600">0.00 SR</h2>
+            </div>
+        </div>
+
+        <div class="glass-card overflow-hidden">
             <table class="w-full text-left">
-                <thead class="bg-slate-50 text-[10px] uppercase text-slate-400">
+                <thead class="bg-slate-50 uppercase text-[10px] text-slate-400 font-bold">
                     <tr>
-                        <th class="p-5">Date</th>
-                        <th class="p-5">Station Name</th>
-                        <th class="p-5 text-blue-600">Mada</th>
-                        <th class="p-5 text-orange-400">Master</th>
-                        <th class="p-5 text-blue-400">Visa</th>
-                        <th class="p-5 font-black text-slate-900">Net Total</th>
+                        <th class="p-6">Date</th>
+                        <th class="p-6">Station Name</th>
+                        <th class="p-6">Mada</th>
+                        <th class="p-6">Visa</th>
+                        <th class="p-6">Master</th>
+                        <th class="p-6 text-slate-900">Net Total</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-xs font-bold divide-y divide-slate-100">
@@ -41,54 +59,56 @@
     </div>
 
     <script>
-        // আপনার নতুন গুগল স্ক্রিপ্ট লিঙ্ক
+        // আপনার এই লিঙ্কটি একদম ঠিক আছে, এটা পরিবর্তন করার দরকার নেই
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtkGvsL_IaxaKvJ2a8pIq_rxaKxBtC04Z6-g2s5kcfXeHlzc_Fw6BHLoCs9BmKo8G8/exec";
 
-        async function loadData() {
+        async function fetchData() {
             try {
-                const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
-                
-                const body = document.getElementById('tableBody');
-                body.innerHTML = "";
-                let gTotal=0, tVat=0, tNet=0;
-
-                data.slice().reverse().forEach(row => {
-                    // শিট থেকে ডাটা রিডিং (Headers: date, station Name, mada, visa, master)
-                    const m = parseFloat(row.mada || 0);
-                    const v = parseFloat(row.visa || 0);
-                    const ms = parseFloat(row.master || 0);
-                    const sName = row.stationname || row.station || "N/A";
-                    const dStr = row.date ? new Date(row.date).toLocaleDateString('en-GB') : "---";
-
-                    const gross = m + v + ms;
-                    const net = gross / 1.15;
-                    const vat = gross - net;
-                    
-                    gTotal += gross; tVat += vat; tNet += net;
-
-                    body.innerHTML += `
-                        <tr>
-                            <td class="p-5 text-slate-400">${dStr}</td>
-                            <td class="p-5 text-blue-900 uppercase italic">${sName}</td>
-                            <td class="p-5 text-blue-600">${m.toFixed(2)}</td>
-                            <td class="p-5 text-orange-400">${ms.toFixed(2)}</td>
-                            <td class="p-5 text-blue-400">${v.toFixed(2)}</td>
-                            <td class="p-5 text-slate-900">${net.toFixed(2)}</td>
-                        </tr>`;
-                });
-
-                document.getElementById('totalGross').innerText = gTotal.toFixed(2) + " SR";
-                document.getElementById('totalTax').innerText = tVat.toFixed(2) + " SR";
-                document.getElementById('totalNet').innerText = tNet.toFixed(2) + " SR";
-
-            } catch(e) { 
-                console.error("Error:", e);
-                alert("ডাটা লোড হতে সমস্যা হচ্ছে। URL চেক করুন।");
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                renderTable(data);
+            } catch (error) {
+                console.error("Error loading data:", error);
             }
         }
 
-        window.onload = loadData;
+        function renderTable(data) {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            let gTotal = 0, tVat = 0, tNet = 0;
+
+            data.slice().reverse().forEach(row => {
+                // আপনার শিটের হেডার: date, Station Name, mada, visa, master
+                const m = parseFloat(row.mada || 0);
+                const v = parseFloat(row.visa || 0);
+                const ms = parseFloat(row.master || 0);
+                const sName = row.stationname || "N/A";
+                const dStr = row.date ? new Date(row.date).toLocaleDateString('en-GB') : "---";
+
+                const gross = m + v + ms;
+                const net = gross / 1.15;
+                const vat = gross - net;
+
+                gTotal += gross; tVat += vat; tNet += net;
+
+                body.innerHTML += `
+                    <tr class="hover:bg-blue-50/30 transition">
+                        <td class="p-6 text-slate-400 font-medium">${dStr}</td>
+                        <td class="p-6 text-blue-900 uppercase italic font-black">${sName}</td>
+                        <td class="p-6 text-blue-600">${m.toFixed(2)}</td>
+                        <td class="p-6 text-slate-500">${v.toFixed(2)}</td>
+                        <td class="p-6 text-orange-400">${ms.toFixed(2)}</td>
+                        <td class="p-6 text-slate-900 font-extrabold">${net.toFixed(2)}</td>
+                    </tr>`;
+            });
+
+            document.getElementById('totalGross').innerText = gTotal.toLocaleString() + " SR";
+            document.getElementById('totalTax').innerText = tVat.toLocaleString() + " SR";
+            document.getElementById('totalNet').innerText = tNet.toLocaleString() + " SR";
+        }
+
+        // পেজ লোড হলেই ডাটা আসবে
+        window.onload = fetchData;
     </script>
 </body>
 </html>
