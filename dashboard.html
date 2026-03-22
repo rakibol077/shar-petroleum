@@ -1,5 +1,5 @@
 <script>
-    // আপনার লিঙ্কটি এখানে আছে
+    // এই লিঙ্কটি আপনার গুগল স্ক্রিপ্ট থেকে আসা নতুন লিঙ্ক
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtkGvsL_IaxaKvJ2a8pIq_rxaKxBtC04Z6-g2s5kcfXeHlzc_Fw6BHLoCs9BmKo8G8/exec";
     let cachedData = [];
 
@@ -9,7 +9,7 @@
             const data = await res.json();
             cachedData = data;
             renderTable(data);
-        } catch(e) { console.error("ডাটা কানেকশন ফেইলড!"); }
+        } catch(e) { console.error("Data Load Error!"); }
     }
 
     function renderTable(data) {
@@ -20,15 +20,12 @@
         data.slice().reverse().forEach((row, index) => {
             const actualIndex = data.length - 1 - index;
             
-            // আপনার নতুন শিট অনুযায়ী ম্যাপিং (১ নম্বর রো ডিলিট করার পর)
-            // কোড এখন Station Name কে stationname হিসেবে খুঁজবে
+            // আপনার নতুন শিট অনুযায়ী ডাটা ধরা (stationname, mada, visa, master)
             const m = parseFloat(row.mada || 0);
             const v = parseFloat(row.visa || 0);
             const ms = parseFloat(row.master || 0);
             const sName = row.stationname || "N/A";
-            
-            const rawDate = row.date;
-            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "---";
+            const dStr = row.date ? new Date(row.date).toLocaleDateString('en-GB') : "---";
 
             const gross = m + v + ms;
             const net = gross / 1.15;
@@ -38,9 +35,9 @@
 
             body.innerHTML += `
                 <tr class="hover:bg-slate-50 border-b border-slate-50 transition">
-                    <td class="p-8 text-slate-400">${dateStr}</td>
+                    <td class="p-8 text-slate-400 font-medium">${dStr}</td>
                     <td class="p-8 text-blue-900 font-black uppercase italic">${sName}</td>
-                    <td class="p-8">${v.toFixed(2)}</td>
+                    <td class="p-8 text-slate-500">${v.toFixed(2)}</td>
                     <td class="p-8 text-orange-400">${ms.toFixed(2)}</td>
                     <td class="p-8 text-blue-600 font-black">${m.toFixed(2)}</td>
                     <td class="p-8 text-red-400">-${vat.toFixed(2)}</td>
@@ -51,10 +48,26 @@
                 </tr>`;
         });
         
-        document.getElementById('totalGross').innerText = gTotal.toLocaleString() + " SR";
-        document.getElementById('totalTax').innerText = tVat.toLocaleString() + " SR";
-        document.getElementById('totalNet').innerText = tNet.toLocaleString() + " SR";
+        document.getElementById('totalGross').innerText = gTotal.toFixed(2) + " SR";
+        document.getElementById('totalTax').innerText = tVat.toFixed(2) + " SR";
+        document.getElementById('totalNet').innerText = tNet.toFixed(2) + " SR";
     }
 
     window.onload = loadData;
+
+    // মডেল ওপেন করার ফাংশন (যাতে এডিট করা যায়)
+    function openModal(idx = null) {
+        const modal = document.getElementById('entryModal');
+        modal.classList.add('active');
+        if(idx !== null) {
+            const r = cachedData[idx];
+            document.getElementById('editIndex').value = idx;
+            document.getElementById('formDate').value = r.date ? new Date(r.date).toISOString().split('T')[0] : "";
+            document.getElementById('formStation').value = r.stationname || "";
+            document.getElementById('formMada').value = r.mada || 0;
+            document.getElementById('formVisa').value = r.visa || 0;
+            document.getElementById('formMaster').value = r.master || 0;
+        }
+    }
+    function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
 </script>
