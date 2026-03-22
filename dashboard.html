@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Advanced Dashboard</title>
+    <title>Shar Petroleum - Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -27,18 +27,18 @@
         </div>
         <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2 text-sm">
             <div class="bg-blue-600 text-white p-3 flex items-center space-x-3 rounded-lg cursor-pointer shadow-md"><i class="fas fa-home"></i> <span>Dashboard</span></div>
-            <p class="text-[10px] font-black text-gray-400 px-3 mt-6 mb-2 uppercase tracking-widest">Reports</p>
-            <div class="p-3 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center space-x-3"><i class="fas fa-chart-line"></i> <span>Sales Report</span></div>
-            <div class="p-3 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center space-x-3"><i class="fas fa-calculator"></i> <span>VAT Analysis</span></div>
+            <p class="text-[10px] font-black text-gray-400 px-3 mt-6 mb-2 uppercase tracking-widest">Reports Center</p>
+            <div class="p-3 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center space-x-3 text-gray-600"><i class="fas fa-file-invoice"></i> <span>Tax Invoice</span></div>
+            <div class="p-3 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center space-x-3 text-gray-600"><i class="fas fa-calculator"></i> <span>VAT Analysis</span></div>
         </nav>
         <div class="p-4 border-t bg-gray-50">
-            <button onclick="location.href='index.html'" class="w-full text-left p-3 text-red-600 font-bold flex items-center space-x-3 hover:bg-red-50 rounded-lg"><i class="fas fa-sign-out-alt"></i> <span>Exit</span></button>
+            <button onclick="location.href='index.html'" class="w-full text-left p-3 text-red-600 font-bold flex items-center space-x-3 hover:bg-red-50 rounded-lg"><i class="fas fa-sign-out-alt"></i> <span>Exit System</span></button>
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
         <header class="bg-white h-16 border-b flex items-center justify-between px-8 shadow-sm">
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Management System</div>
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Petroleum Management System</div>
             <div class="flex items-center space-x-4">
                 <span id="roleLabel" class="text-[9px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">...</span>
                 <div class="w-8 h-8 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold text-[10px]">RI</div>
@@ -49,15 +49,15 @@
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <h1 class="text-xl font-bold text-gray-800 uppercase">Station Master Data</h1>
-                    <p class="text-xs text-gray-400 mt-1">Real-time sync with Google Sheets (Visa/Master/Mada included)</p>
+                    <p class="text-xs text-gray-400 mt-1 italic">Synced with Google Sheets (Visa/Master/Mada)</p>
                 </div>
-                <button onclick="toggleModal()" id="addBtn" class="admin-only bg-[#00adef] hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-xs shadow-xl transition flex items-center space-x-2">
-                    <i class="fas fa-plus-circle"></i> <span>ADD NEW ENTRY</span>
+                <button onclick="toggleModal()" id="addBtn" class="admin-only bg-[#00adef] hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-[11px] shadow-xl transition flex items-center space-x-2">
+                    <i class="fas fa-plus-circle"></i> <span>ADD NEW DATA</span>
                 </button>
             </div>
 
             <div class="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse min-w-[800px]">
+                <table class="w-full text-left text-xs border-collapse min-w-[900px]">
                     <thead class="bg-gray-50 text-gray-500 font-black uppercase text-[9px] border-b">
                         <tr>
                             <th class="p-4">Date</th>
@@ -67,11 +67,11 @@
                             <th class="p-4">Master</th>
                             <th class="p-4">Mada</th>
                             <th class="p-4">VAT (15%)</th>
-                            <th class="p-4">Total</th>
+                            <th class="p-4">Total Amount</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50" id="tableBody">
-                        <tr><td colspan="8" class="p-10 text-center text-gray-400">Loading data from Google Sheets...</td></tr>
+                        <tr><td colspan="8" class="p-10 text-center text-gray-400">Loading records from Google Sheets...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -79,24 +79,45 @@
     </main>
 
     <div id="entryModal" class="fixed inset-0 flex items-center justify-center z-[100] p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8">
-            <h3 class="font-black text-gray-800 uppercase text-sm mb-6">New Station Entry</h3>
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8 border border-gray-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-black text-gray-800 uppercase text-sm tracking-widest">Station Entry Form</h3>
+                <button onclick="toggleModal()" class="text-gray-300 hover:text-red-500 text-2xl">&times;</button>
+            </div>
             <form onsubmit="event.preventDefault(); addData();">
-                <div class="space-y-4">
-                    <input type="text" id="sName" placeholder="Station Name" class="w-full p-3 border rounded-xl bg-gray-50 text-sm outline-none focus:border-blue-500" required>
-                    <input type="number" id="sAmount" placeholder="Cash Sales Amount" class="w-full p-3 border rounded-xl bg-gray-50 text-sm outline-none focus:border-blue-500" required>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="number" id="sVisa" placeholder="Visa" class="p-3 border rounded-xl bg-gray-50 text-xs outline-none">
-                        <input type="number" id="sMaster" placeholder="Master" class="p-3 border rounded-xl bg-gray-50 text-xs outline-none">
-                        <input type="number" id="sMada" placeholder="Mada" class="p-3 border rounded-xl bg-gray-50 text-xs outline-none">
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="text-[9px] font-black text-gray-400 uppercase">Station Name</label>
+                        <input type="text" id="sName" class="w-full p-3 border border-gray-100 rounded-xl bg-gray-50 text-sm focus:border-blue-500 outline-none" placeholder="Ex: Khalis Petroleum" required>
                     </div>
-                    <button type="submit" id="saveBtn" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl hover:bg-black transition-all uppercase text-xs">Save Record</button>
+                    <div>
+                        <label class="text-[9px] font-black text-gray-400 uppercase">Cash Sales Amount (SAR)</label>
+                        <input type="number" id="sAmount" class="w-full p-3 border border-gray-100 rounded-xl bg-gray-50 text-sm focus:border-blue-500 outline-none font-bold" placeholder="0.00" required>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="text-[9px] font-black text-gray-400 uppercase">Visa</label>
+                            <input type="number" id="sVisa" placeholder="0" class="w-full p-3 border border-gray-100 rounded-xl bg-gray-50 text-xs outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black text-gray-400 uppercase">Master</label>
+                            <input type="number" id="sMaster" placeholder="0" class="w-full p-3 border border-gray-100 rounded-xl bg-gray-50 text-xs outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black text-gray-400 uppercase">Mada</label>
+                            <input type="number" id="sMada" placeholder="0" class="w-full p-3 border border-gray-100 rounded-xl bg-gray-50 text-xs outline-none">
+                        </div>
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit" id="saveBtn" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-2xl hover:bg-black transition-all uppercase tracking-widest text-xs">Save to Google Sheets</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        // আপনার কপি করা নতুন Web App URL লিঙ্কটি এখানে বসানো হয়েছে
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw8lyzJB0rOcLkcH0V5V3hC08XHe3ASHTKfee9GW9OqzzkF9I_Df2BHe8qqqfZAo-M/exec";
 
         function toggleModal() {
@@ -104,6 +125,7 @@
             modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
         }
 
+        // ডাটা লোড করার ফাংশন
         async function loadData() {
             try {
                 const response = await fetch(SCRIPT_URL);
@@ -111,38 +133,48 @@
                 const tableBody = document.getElementById('tableBody');
                 tableBody.innerHTML = "";
 
+                if (data.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="8" class="p-10 text-center text-gray-400 font-bold uppercase">No database records found</td></tr>`;
+                    return;
+                }
+
                 data.reverse().forEach(row => {
                     const date = new Date(row.date).toLocaleDateString();
                     tableBody.innerHTML += `
                         <tr class="hover:bg-blue-50/50 transition">
                             <td class="p-4 text-gray-400">${date}</td>
                             <td class="p-4 font-black text-blue-900 uppercase">${row.stationName}</td>
-                            <td class="p-4 font-bold">${row.salesAmount.toLocaleString()}</td>
-                            <td class="p-4 text-blue-500">${row.visa.toLocaleString()}</td>
-                            <td class="p-4 text-orange-500">${row.master.toLocaleString()}</td>
-                            <td class="p-4 text-green-500">${row.mada.toLocaleString()}</td>
-                            <td class="p-4 text-gray-400">${row.vatAmount.toLocaleString()}</td>
-                            <td class="p-4 font-black text-gray-800">${row.totalAmount.toLocaleString()}</td>
+                            <td class="p-4 font-bold text-gray-700">${parseFloat(row.salesAmount).toLocaleString()}.00</td>
+                            <td class="p-4 text-blue-500 font-medium">${parseFloat(row.visa || 0).toLocaleString()}</td>
+                            <td class="p-4 text-orange-500 font-medium">${parseFloat(row.master || 0).toLocaleString()}</td>
+                            <td class="p-4 text-green-600 font-medium">${parseFloat(row.mada || 0).toLocaleString()}</td>
+                            <td class="p-4 text-gray-400 italic">${parseFloat(row.vatAmount).toLocaleString()}</td>
+                            <td class="p-4 font-black text-gray-900 bg-gray-50/50">${parseFloat(row.totalAmount).toLocaleString()}</td>
                         </tr>`;
                 });
-            } catch (error) { console.error(error); }
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" class="p-10 text-center text-red-400 font-bold uppercase underline">Check Google Script Deployment</td></tr>`;
+            }
         }
 
+        // ডাটা সেভ করার ফাংশন
         async function addData() {
-            const btn = document.getElementById('saveBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const name = document.getElementById('sName').value;
             const amount = parseFloat(document.getElementById('sAmount').value) || 0;
             const visa = parseFloat(document.getElementById('sVisa').value) || 0;
             const master = parseFloat(document.getElementById('sMaster').value) || 0;
             const mada = parseFloat(document.getElementById('sMada').value) || 0;
-            
+
             const vat = amount * 0.15;
             const total = amount + vat;
 
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> SAVING...';
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span> UPLOADING...';
 
             const payload = {
-                stationName: document.getElementById('sName').value,
+                stationName: name,
                 salesAmount: amount,
                 visa: visa,
                 master: master,
@@ -151,11 +183,24 @@
                 totalAmount: total
             };
 
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            toggleModal();
-            loadData();
-            btn.disabled = false;
-            btn.innerHTML = 'Save Record';
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                toggleModal();
+                document.getElementById('sName').value = "";
+                document.getElementById('sAmount').value = "";
+                document.getElementById('sVisa').value = "";
+                document.getElementById('sMaster').value = "";
+                document.getElementById('sMada').value = "";
+                loadData(); // রিফ্রেশ না করে ডাটা আপডেট করা
+            } catch (error) {
+                alert("Cloud Sync Failed! Check Internet Connection.");
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'Save to Google Sheets';
+            }
         }
 
         function checkRole() {
@@ -163,12 +208,16 @@
             if (role === 'admin') {
                 document.getElementById('addBtn').style.display = 'flex';
                 document.getElementById('roleLabel').innerText = "ADMINISTRATOR";
+                document.getElementById('roleLabel').className = "text-[9px] font-bold text-blue-600 uppercase tracking-tighter";
             } else {
-                document.getElementById('roleLabel').innerText = "VIEWER";
+                document.getElementById('roleLabel').innerText = "VIEWER ACCOUNT";
             }
         }
 
-        window.onload = () => { checkRole(); loadData(); };
+        window.onload = () => {
+            checkRole();
+            loadData();
+        };
     </script>
 </body>
 </html>
