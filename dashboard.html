@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shar Petroleum - Management & Reports</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -15,6 +16,8 @@
         .nav-item:hover { background: #eeefff; color: #6366f1; }
         .nav-active { background: #e0e2ff; color: #4f46e5; border-right: 4px solid #4f46e5; }
         .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* গ্রাফের জন্য স্টাইল */
+        .chart-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; }
         #entryModal, #reportModal { display: none; }
         #entryModal.active, #reportModal.active { display: flex; }
         @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 15px; } }
@@ -53,6 +56,11 @@
             <div class="stat-card border-b-4 border-green-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
         </div>
 
+        <div class="chart-card">
+            <h4 class="font-bold text-xs text-gray-700 uppercase italic mb-4">7-Day Sales Analysis</h4>
+            <canvas id="salesChart" height="100"></canvas>
+        </div>
+
         <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
             <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
                 <h4 class="font-bold text-xs text-gray-700 uppercase italic">Recent Transactions</h4>
@@ -83,7 +91,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
                 <div class="md:col-span-2">
-                    <label class="text-[9px] font-bold text-blue-600 uppercase">Select Month (Monthly Report)</label>
+                    <label class="text-[9px] font-bold text-blue-600 uppercase">Select Month</label>
                     <input type="month" id="reportMonth" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none">
                 </div>
                 <div>
@@ -91,7 +99,7 @@
                     <input type="date" id="reportDay" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none">
                 </div>
                 <div class="flex items-end">
-                    <button onclick="window.print()" class="w-full bg-blue-600 text-white p-2 rounded font-bold text-[10px] uppercase shadow-md hover:bg-blue-700 transition"><i class="fas fa-print mr-1"></i> Print</button>
+                    <button onclick="window.print()" class="w-full bg-blue-600 text-white p-2 rounded font-bold text-[10px] uppercase shadow-md"><i class="fas fa-print mr-1"></i> Print</button>
                 </div>
             </div>
 
@@ -120,16 +128,16 @@
             <h2 id="modalTitle" class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">Record Entry</h2>
             <form id="dataForm" class="space-y-4">
                 <input type="hidden" id="editIndex">
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-3 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-blue-400"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-3 bg-gray-50 rounded-lg outline-none uppercase"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-3 bg-gray-50 rounded-lg"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-3 bg-gray-50 rounded-lg uppercase"></div>
                 <div class="grid grid-cols-3 gap-2">
-                    <div><label class="text-[9px] font-bold text-blue-600">Mada</label><input type="number" step="any" id="formMada" placeholder="0.00" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
-                    <div><label class="text-[9px] font-bold text-slate-600">Visa</label><input type="number" step="any" id="formVisa" placeholder="0.00" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
-                    <div><label class="text-[9px] font-bold text-orange-400">Master</label><input type="number" step="any" id="formMaster" placeholder="0.00" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                    <div><label class="text-[9px] font-bold text-blue-600">Mada</label><input type="number" step="any" id="formMada" class="w-full p-2 bg-gray-50 rounded-lg"></div>
+                    <div><label class="text-[9px] font-bold text-slate-600">Visa</label><input type="number" step="any" id="formVisa" class="w-full p-2 bg-gray-50 rounded-lg"></div>
+                    <div><label class="text-[9px] font-bold text-orange-400">Master</label><input type="number" step="any" id="formMaster" class="w-full p-2 bg-gray-50 rounded-lg"></div>
                 </div>
                 <div class="flex gap-2 mt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-[10px]">Cancel</button>
-                    <button type="submit" id="saveBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold uppercase text-[10px] shadow-lg">Save Record</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold uppercase text-[10px]">Save Record</button>
                 </div>
             </form>
         </div>
@@ -138,6 +146,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtkGvsL_IaxaKvJ2a8pIq_rxaKxBtC04Z6-g2s5kcfXeHlzc_Fw6BHLoCs9BmKo8G8/exec";
         let cachedData = [];
+        let salesChart;
 
         async function loadData() {
             try {
@@ -145,6 +154,7 @@
                 const data = await res.json();
                 cachedData = data;
                 renderTable(data);
+                renderChart(data); // চার্ট রেন্ডার ফাংশন
             } catch(e) { console.error("Error!"); }
         }
 
@@ -160,16 +170,16 @@
                 gT += gross; vT += vat; nT += net;
 
                 body.innerHTML += `
-                    <tr class="hover:bg-blue-50/30 transition">
-                        <td class="p-4 text-gray-400 font-medium">${new Date(row.date).toLocaleDateString()}</td>
+                    <tr class="hover:bg-blue-50/30 transition border-b">
+                        <td class="p-4 text-gray-400">${new Date(row.date).toLocaleDateString()}</td>
                         <td class="p-4 font-black text-slate-800 uppercase italic">${row.stationname || "N/A"}</td>
                         <td class="p-4 text-blue-600 font-bold">${m.toFixed(2)}</td>
                         <td class="p-4 text-slate-500">${v.toFixed(2)}</td>
                         <td class="p-4 text-orange-400">${ms.toFixed(2)}</td>
                         <td class="p-4 font-black text-slate-900">${net.toFixed(2)}</td>
                         <td class="p-4 flex justify-center gap-3">
-                            <button onclick="openModal(${actualIndex})" class="text-blue-500 hover:scale-110"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteRow(${actualIndex})" class="text-red-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                            <button onclick="openModal(${actualIndex})" class="text-blue-500"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteRow(${actualIndex})" class="text-red-300"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
@@ -178,49 +188,63 @@
             document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
         }
 
-        // --- REPORT LOGIC ---
+        // --- গ্রাফ লজিক ---
+        function renderChart(data) {
+            const last7Records = data.slice(-7);
+            const labels = last7Records.map(r => new Date(r.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}));
+            const values = last7Records.map(r => (parseFloat(r.mada||0) + parseFloat(r.visa||0) + parseFloat(r.master||0)));
+
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if(salesChart) salesChart.destroy();
+
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Gross Sales',
+                        data: values,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        // --- অন্যান্য ফাংশন আগের মতোই ---
         function generateReport() {
-            const monthVal = document.getElementById('reportMonth').value; // YYYY-MM
-            const dayVal = document.getElementById('reportDay').value; // YYYY-MM-DD
+            const monthVal = document.getElementById('reportMonth').value;
+            const dayVal = document.getElementById('reportDay').value;
             const reportTable = document.getElementById('reportTableBody');
             const footer = document.getElementById('reportFooter');
-            
             reportTable.innerHTML = "";
             let rGross=0, rVat=0, rNet=0;
-
             cachedData.forEach(row => {
                 const rowDateObj = new Date(row.date);
                 const rowMonth = rowDateObj.toISOString().substring(0, 7);
                 const rowDay = rowDateObj.toISOString().substring(0, 10);
-
                 let match = false;
                 if (dayVal && rowDay === dayVal) match = true;
                 else if (monthVal && rowMonth === monthVal && !dayVal) match = true;
-
                 if (match) {
                     const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
                     const gross = m+v+ms, net = gross/1.15, vat = gross-net;
                     rGross += gross; rVat += vat; rNet += net;
-
-                    reportTable.innerHTML += `
-                        <tr class="text-slate-700">
-                            <td class="p-3">${rowDay}</td>
-                            <td class="p-3 uppercase font-bold text-blue-900">${row.stationname}</td>
-                            <td class="p-3">${gross.toFixed(2)}</td>
-                            <td class="p-3 text-red-500">${vat.toFixed(2)}</td>
-                            <td class="p-3 font-bold text-slate-900">${net.toFixed(2)}</td>
-                        </tr>`;
+                    reportTable.innerHTML += `<tr><td class="p-3">${rowDay}</td><td class="p-3 uppercase font-bold">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${vat.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
                 }
             });
-
-            footer.innerHTML = `
-                <td colspan="2" class="p-3 text-right">TOTALS:</td>
-                <td class="p-3 text-blue-900">${rGross.toFixed(2)}</td>
-                <td class="p-3 text-red-500">${rVat.toFixed(2)}</td>
-                <td class="p-3 text-green-700">${rNet.toFixed(2)}</td>`;
+            footer.innerHTML = `<td colspan="2" class="p-3 text-right font-black">TOTALS:</td><td class="p-3 text-blue-900">${rGross.toFixed(2)}</td><td class="p-3 text-red-500">${rVat.toFixed(2)}</td><td class="p-3 text-green-700">${rNet.toFixed(2)}</td>`;
         }
 
-        // --- MODAL & FORM HELPERS ---
         function openReportModal() { document.getElementById('reportModal').classList.add('active'); }
         function closeReportModal() { document.getElementById('reportModal').classList.remove('active'); }
         
@@ -229,7 +253,6 @@
             const btn = document.getElementById('saveBtn');
             const editIdx = document.getElementById('editIndex').value;
             btn.innerText = "Saving..."; btn.disabled = true;
-
             const payload = {
                 date: document.getElementById('formDate').value,
                 stationName: document.getElementById('formStation').value.toUpperCase(),
@@ -239,7 +262,6 @@
                 action: editIdx === "" ? "add" : "edit",
                 index: editIdx
             };
-
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
             setTimeout(() => { closeModal(); loadData(); btn.innerText = "Save Record"; btn.disabled = false; }, 1500);
         };
