@@ -7,71 +7,75 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .sidebar { background-color: #f9f9ff; height: 100vh; width: 260px; position: fixed; border-right: 1px solid #e5e7eb; z-index: 10; }
-        .main-content { margin-left: 260px; padding: 30px; }
-        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        #entryModal { display: none; }
-        #entryModal.active { display: flex; }
-        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 15px; } }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-bottom: 4px solid; }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-    <div class="sidebar">
-        <div class="p-6 flex flex-col items-center border-b mb-4">
-            <h2 class="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Shar Petroleum</h2>
-        </div>
-        <nav>
-            <a onclick="location.reload()" class="p-4 text-blue-600 font-bold block"><i class="fas fa-th-large mr-2"></i> Dashboard</a>
-            <a onclick="openModal()" class="p-4 text-gray-600 block cursor-pointer"><i class="fas fa-plus-circle mr-2"></i> Data Entry</a>
-        </nav>
-    </div>
-
-    <div class="main-content">
+    <div class="max-w-6xl mx-auto">
         <header class="flex justify-between items-center mb-8">
-            <h1 class="text-lg font-black text-gray-800 uppercase italic">Management Dashboard</h1>
-            <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold uppercase shadow-lg">New Entry</button>
+            <div>
+                <h1 class="text-2xl font-black text-gray-800 uppercase italic tracking-tighter">Shar Petroleum</h1>
+                <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Management System v2.0</p>
+            </div>
+            <button onclick="document.getElementById('entryModal').style.display='flex'" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold shadow-lg hover:bg-blue-700 transition uppercase">New Entry</button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
-            <div class="stat-card border-b-4 border-blue-600"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Gross</p><h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-red-500"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Bank Fee</p><h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-green-500"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Net Sales</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card border-blue-600 text-center">
+                <p class="text-gray-400 text-[10px] font-bold uppercase italic">Total Gross</p>
+                <h3 id="totalGross" class="text-2xl font-black text-slate-800 text-blue-900">0.00 SR</h3>
+            </div>
+            <div class="stat-card border-red-500 text-center">
+                <p class="text-gray-400 text-[10px] font-bold uppercase italic">Total Bank Fee</p>
+                <h3 id="totalFee" class="text-2xl font-black text-red-500">0.00 SR</h3>
+            </div>
+            <div class="stat-card border-green-500 text-center">
+                <p class="text-gray-400 text-[10px] font-bold uppercase italic">Net Sales</p>
+                <h3 id="totalNet" class="text-2xl font-black text-green-600">0.00 SR</h3>
+            </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border">
-            <table class="w-full text-left text-[11px]">
-                <thead class="bg-gray-100 text-gray-500 uppercase text-[9px]">
-                    <tr>
-                        <th class="p-4">Date</th>
-                        <th class="p-4">Station</th>
-                        <th class="p-4 text-blue-600">Mada (1%)</th>
-                        <th class="p-4 text-slate-600">Visa (2.75%)</th>
-                        <th class="p-4 text-orange-400">Master (2.75%)</th>
-                        <th class="p-4 font-black text-slate-900">Net Total</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody" class="divide-y divide-gray-50 italic font-medium"></tbody>
-            </table>
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+            <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+                <h2 class="text-xs font-bold uppercase text-gray-500">Sales Records</h2>
+                <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search Station..." class="border rounded-lg px-3 py-1 text-xs outline-none w-48">
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-[11px]" id="salesTable">
+                    <thead class="bg-gray-100 text-gray-500 uppercase text-[9px] font-bold">
+                        <tr>
+                            <th class="p-4">Date</th>
+                            <th class="p-4">Station Name</th>
+                            <th class="p-4">Mada (1%)</th>
+                            <th class="p-4">Visa (2.75%)</th>
+                            <th class="p-4">Master (2.75%)</th>
+                            <th class="p-4 font-black text-black">Net Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-50 italic font-medium">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <div id="entryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white p-8 rounded-2xl w-full max-w-sm shadow-2xl">
-            <h2 class="text-lg font-black mb-6 uppercase italic text-blue-900">Record Entry</h2>
+            <h2 class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">New Entry</h2>
             <form id="dataForm" class="space-y-4">
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-3 bg-gray-50 rounded-lg outline-none"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-3 bg-gray-50 rounded-lg uppercase outline-none"></div>
-                <div class="grid grid-cols-3 gap-2 text-[9px] font-bold uppercase">
-                    <div>Mada<input type="number" step="any" id="formMada" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
-                    <div>Visa<input type="number" step="any" id="formVisa" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
-                    <div>Master<input type="number" step="any" id="formMaster" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-2 bg-gray-50 rounded border outline-none"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-2 bg-gray-50 rounded border uppercase outline-none"></div>
+                <div class="grid grid-cols-3 gap-2 text-[9px] font-bold uppercase text-gray-500">
+                    <div>Mada<input type="number" step="any" id="formMada" placeholder="0.00" class="w-full p-2 bg-gray-50 border rounded"></div>
+                    <div>Visa<input type="number" step="any" id="formVisa" placeholder="0.00" class="w-full p-2 bg-gray-50 border rounded"></div>
+                    <div>Master<input type="number" step="any" id="formMaster" placeholder="0.00" class="w-full p-2 bg-gray-50 border rounded"></div>
                 </div>
                 <div class="flex gap-2 mt-6">
-                    <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-[10px]">Cancel</button>
-                    <button type="submit" id="saveBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold uppercase text-[10px]">Save</button>
+                    <button type="button" onclick="document.getElementById('entryModal').style.display='none'" class="flex-1 py-2 text-gray-400 font-bold uppercase text-[10px]">Cancel</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-2 bg-blue-600 text-white rounded font-bold uppercase text-[10px]">Save Record</button>
                 </div>
             </form>
         </div>
@@ -79,46 +83,54 @@
 
     <script>
         // আপনার নতুন আপডেট করা লিঙ্ক
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfAR5EClYBkUehbYjGzxHNCS7Cpf09io3dGki4hM15BWurvNW57ziPt8SiZVLZLAhC/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwH-2nst6rsUODV0V00f2-4_CFzyhh2rFktkRuCYZa2IerkTopRMzAYfqr-il7JQfF2/exec";
 
+        // ১. ডাটা লোড করা (JSONP Method)
         function loadData() {
             const script = document.createElement('script');
             script.src = `${SCRIPT_URL}?callback=handleResponse`;
             document.body.appendChild(script);
         }
 
+        // ২. ডাটা শো করা
         function handleResponse(data) {
             const body = document.getElementById('tableBody');
             body.innerHTML = "";
-            let gT=0, vT=0, nT=0;
-            
+            let grossTotal=0, feeTotal=0, netTotal=0;
+
             data.slice().reverse().forEach(row => {
-                const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
-                const fee = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
-                const gross = m + v + ms, net = gross - fee;
-                gT += gross; vT += fee; nT += net;
+                const m = parseFloat(row.mada || 0);
+                const v = parseFloat(row.visa || 0);
+                const ms = parseFloat(row.master || 0);
                 
+                const fee = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
+                const gross = m + v + ms;
+                const net = gross - fee;
+
+                grossTotal += gross; feeTotal += fee; netTotal += net;
+
                 body.innerHTML += `
-                    <tr class="hover:bg-blue-50/30">
-                        <td class="p-4 text-gray-400 italic">${new Date(row.date).toLocaleDateString()}</td>
+                    <tr class="hover:bg-blue-50/50">
+                        <td class="p-4 text-gray-400 italic font-bold">${new Date(row.date).toLocaleDateString()}</td>
                         <td class="p-4 font-black text-slate-800 uppercase italic">${row.stationname}</td>
-                        <td class="p-4 text-blue-600">${m.toFixed(2)}</td>
+                        <td class="p-4 text-blue-600 font-bold">${m.toFixed(2)}</td>
                         <td class="p-4 text-slate-600">${v.toFixed(2)}</td>
                         <td class="p-4 text-orange-400">${ms.toFixed(2)}</td>
-                        <td class="p-4 font-black text-slate-900">${net.toFixed(2)}</td>
+                        <td class="p-4 font-black text-slate-900 border-l bg-gray-50/50">${net.toFixed(2)}</td>
                     </tr>`;
             });
-            
-            document.getElementById('totalGross').innerText = gT.toFixed(2) + " SR";
-            document.getElementById('totalVat').innerText = vT.toFixed(2) + " SR";
-            document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
+
+            document.getElementById('totalGross').innerText = grossTotal.toFixed(2) + " SR";
+            document.getElementById('totalFee').innerText = feeTotal.toFixed(2) + " SR";
+            document.getElementById('totalNet').innerText = netTotal.toFixed(2) + " SR";
         }
 
+        // ৩. ডাটা সেভ করা
         document.getElementById('dataForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
-            btn.innerText = "Saving..."; btn.disabled = true;
-            
+            btn.innerText = "SAVING..."; btn.disabled = true;
+
             const payload = {
                 date: document.getElementById('formDate').value,
                 stationName: document.getElementById('formStation').value.toUpperCase(),
@@ -127,14 +139,23 @@
                 master: Number(document.getElementById('formMaster').value) || 0,
                 action: "add"
             };
-            
+
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-            setTimeout(() => { closeModal(); location.reload(); }, 1500);
+            setTimeout(() => { location.reload(); }, 1500);
         };
 
-        function openModal() { document.getElementById('entryModal').classList.add('active'); }
-        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
-        
+        // ৪. সার্চ অপশন
+        function searchTable() {
+            let input = document.getElementById("searchInput").value.toUpperCase();
+            let tr = document.getElementById("tableBody").getElementsByTagName("tr");
+            for (let i = 0; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName("td")[1]; // Station Name column
+                if (td) {
+                    tr[i].style.display = td.innerText.toUpperCase().indexOf(input) > -1 ? "" : "none";
+                }
+            }
+        }
+
         window.onload = loadData;
     </script>
 </body>
