@@ -11,11 +11,9 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .sidebar { background-color: #f9f9ff; height: 100vh; width: 260px; position: fixed; border-right: 1px solid #e5e7eb; z-index: 10; }
         .main-content { margin-left: 260px; padding: 30px; }
-        .nav-item { padding: 12px 24px; color: #4b5563; display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 500; cursor: pointer; }
-        .nav-active { background: #e0e2ff; color: #4f46e5; border-right: 4px solid #4f46e5; }
         .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        #entryModal, #reportModal { display: none; }
-        #entryModal.active, #reportModal.active { display: flex; }
+        #entryModal { display: none; }
+        #entryModal.active { display: flex; }
         @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 15px; } }
     </style>
 </head>
@@ -26,209 +24,117 @@
             <h2 class="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Shar Petroleum</h2>
         </div>
         <nav>
-            <a onclick="location.reload()" class="nav-item nav-active"><i class="fas fa-th-large"></i> Dashboard</a>
-            <a onclick="openModal()" class="nav-item"><i class="fas fa-plus-circle"></i> Data Entry</a>
-            <a onclick="openReportModal()" class="nav-item font-bold text-blue-600"><i class="fas fa-file-invoice"></i> Reports</a>
+            <a onclick="location.reload()" class="p-4 text-blue-600 font-bold block"><i class="fas fa-th-large mr-2"></i> Dashboard</a>
+            <a onclick="openModal()" class="p-4 text-gray-600 block cursor-pointer"><i class="fas fa-plus-circle mr-2"></i> Data Entry</a>
         </nav>
     </div>
 
     <div class="main-content">
         <header class="flex justify-between items-center mb-8">
             <h1 class="text-lg font-black text-gray-800 uppercase italic">Management Dashboard</h1>
-            <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold shadow-lg uppercase hover:bg-blue-700">New Entry</button>
+            <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold uppercase shadow-lg">New Entry</button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="stat-card border-b-4 border-blue-600 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Gross</p><h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-red-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Bank Fee</p><h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-green-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Net Sales</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+            <div class="stat-card border-b-4 border-blue-600"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Gross</p><h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3></div>
+            <div class="stat-card border-b-4 border-red-500"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Bank Fee</p><h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3></div>
+            <div class="stat-card border-b-4 border-green-500"><p class="text-gray-400 text-[10px] font-bold uppercase italic">Net Sales</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm overflow-hidden border">
-            <div class="p-4 bg-gray-50 border-b flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold">Station:</span>
-                    <select id="stationFilter" onchange="filterTable()" class="border rounded px-2 py-1 text-xs outline-none">
-                        <option value="">All Stations</option>
-                    </select>
-                </div>
-                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search Date..." class="border rounded px-3 py-1 text-xs outline-none w-full md:w-64">
-            </div>
             <table class="w-full text-left text-[11px]">
                 <thead class="bg-gray-100 text-gray-500 uppercase text-[9px]">
                     <tr>
                         <th class="p-4">Date</th>
                         <th class="p-4">Station</th>
-                        <th class="p-4 text-blue-600">Mada</th>
-                        <th class="p-4">Visa</th>
-                        <th class="p-4">Master</th>
-                        <th class="p-4 font-black">Net Total</th>
-                        <th class="p-4 text-center">Actions</th>
+                        <th class="p-4 text-blue-600">Mada (1%)</th>
+                        <th class="p-4 text-slate-600">Visa (2.75%)</th>
+                        <th class="p-4 text-orange-400">Master (2.75%)</th>
+                        <th class="p-4 font-black text-slate-900">Net Total</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="divide-y divide-gray-50"></tbody>
+                <tbody id="tableBody" class="divide-y divide-gray-50 italic font-medium"></tbody>
             </table>
         </div>
     </div>
 
     <div id="entryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white p-8 rounded-2xl w-full max-w-sm shadow-2xl">
-            <h2 class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">Record Entry</h2>
+            <h2 class="text-lg font-black mb-6 uppercase italic text-blue-900">Record Entry</h2>
             <form id="dataForm" class="space-y-4">
-                <input type="hidden" id="editIndex">
                 <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-3 bg-gray-50 rounded-lg outline-none"></div>
                 <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-3 bg-gray-50 rounded-lg uppercase outline-none"></div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div><label class="text-[9px] font-bold">Mada</label><input type="number" step="any" id="formMada" class="w-full p-2 bg-gray-50 rounded-lg"></div>
-                    <div><label class="text-[9px] font-bold">Visa</label><input type="number" step="any" id="formVisa" class="w-full p-2 bg-gray-50 rounded-lg"></div>
-                    <div><label class="text-[9px] font-bold">Master</label><input type="number" step="any" id="formMaster" class="w-full p-2 bg-gray-50 rounded-lg"></div>
+                <div class="grid grid-cols-3 gap-2 text-[9px] font-bold uppercase">
+                    <div>Mada<input type="number" step="any" id="formMada" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                    <div>Visa<input type="number" step="any" id="formVisa" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                    <div>Master<input type="number" step="any" id="formMaster" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
                 </div>
                 <div class="flex gap-2 mt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-[10px]">Cancel</button>
-                    <button type="submit" id="saveBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold uppercase text-[10px]">Save Record</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold uppercase text-[10px]">Save</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="reportModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center border-b pb-4 mb-6">
-                <h2 class="text-lg font-black uppercase italic text-blue-900">Tax Invoice Report</h2>
-                <button onclick="closeReportModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input type="month" id="reportMonth" onchange="generateReport()" class="border p-2 rounded text-xs">
-                <button onclick="window.print()" class="bg-gray-800 text-white p-2 rounded text-xs font-bold">PRINT REPORT</button>
-            </div>
-            <div class="overflow-y-auto">
-                <table class="w-full text-left text-[11px]">
-                    <thead class="bg-blue-900 text-white uppercase text-[9px]">
-                        <tr><th class="p-3">Date</th><th class="p-3">Station</th><th class="p-3">Gross</th><th class="p-3">VAT Fee</th><th class="p-3">Net</th></tr>
-                    </thead>
-                    <tbody id="reportTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <script>
         // আপনার নতুন আপডেট করা লিঙ্ক
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFcCf2WmRzZ42SZ_lE9xRMJQGt3yj_StYL0BYcgZtlEIwYk_6v1n4zHbl03xA-T8M/exec";
-        let cachedData = [];
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfAR5EClYBkUehbYjGzxHNCS7Cpf09io3dGki4hM15BWurvNW57ziPt8SiZVLZLAhC/exec";
 
-        async function loadData() {
-            try {
-                const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
-                cachedData = data;
-                updateStationDropdown(data);
-                renderTable(data);
-            } catch(e) { console.error("Error loading data!"); }
+        function loadData() {
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_URL}?callback=handleResponse`;
+            document.body.appendChild(script);
         }
 
-        function updateStationDropdown(data) {
-            const dropdown = document.getElementById('stationFilter');
-            const stations = [...new Set(data.map(item => item.stationname.toUpperCase()))].sort();
-            dropdown.innerHTML = '<option value="">All Stations</option>';
-            stations.forEach(s => { dropdown.innerHTML += `<option value="${s}">${s}</option>`; });
-        }
-
-        function filterTable() {
-            const searchText = document.getElementById("searchInput").value.toUpperCase();
-            const stationValue = document.getElementById("stationFilter").value.toUpperCase();
-            const table = document.getElementById("tableBody");
-            const tr = table.getElementsByTagName("tr");
-            for (let i = 0; i < tr.length; i++) {
-                const tdDate = tr[i].getElementsByTagName("td")[0];
-                const tdStation = tr[i].getElementsByTagName("td")[1];
-                if (tdDate && tdStation) {
-                    const matchSearch = tdDate.innerText.toUpperCase().indexOf(searchText) > -1;
-                    const matchStation = stationValue === "" || tdStation.innerText.toUpperCase() === stationValue;
-                    tr[i].style.display = (matchSearch && matchStation) ? "" : "none";
-                }
-            }
-        }
-
-        function renderTable(data) {
+        function handleResponse(data) {
             const body = document.getElementById('tableBody');
             body.innerHTML = "";
             let gT=0, vT=0, nT=0;
-            data.slice().reverse().forEach((row, index) => {
-                const actualIndex = data.length - 1 - index;
+            
+            data.slice().reverse().forEach(row => {
                 const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
                 const fee = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
-                const gross = m+v+ms, net = gross - fee;
+                const gross = m + v + ms, net = gross - fee;
                 gT += gross; vT += fee; nT += net;
+                
                 body.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-4 text-gray-500">${new Date(row.date).toLocaleDateString()}</td>
-                        <td class="p-4 font-bold uppercase italic">${row.stationname}</td>
+                    <tr class="hover:bg-blue-50/30">
+                        <td class="p-4 text-gray-400 italic">${new Date(row.date).toLocaleDateString()}</td>
+                        <td class="p-4 font-black text-slate-800 uppercase italic">${row.stationname}</td>
                         <td class="p-4 text-blue-600">${m.toFixed(2)}</td>
-                        <td class="p-4">${v.toFixed(2)}</td>
+                        <td class="p-4 text-slate-600">${v.toFixed(2)}</td>
                         <td class="p-4 text-orange-400">${ms.toFixed(2)}</td>
                         <td class="p-4 font-black text-slate-900">${net.toFixed(2)}</td>
-                        <td class="p-4 text-center">
-                            <button onclick="openModal(${actualIndex})" class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteRow(${actualIndex})" class="text-red-300"><i class="fas fa-trash"></i></button>
-                        </td>
                     </tr>`;
             });
+            
             document.getElementById('totalGross').innerText = gT.toFixed(2) + " SR";
             document.getElementById('totalVat').innerText = vT.toFixed(2) + " SR";
             document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
-            filterTable();
         }
 
         document.getElementById('dataForm').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('saveBtn'), editIdx = document.getElementById('editIndex').value;
+            const btn = document.getElementById('saveBtn');
             btn.innerText = "Saving..."; btn.disabled = true;
+            
             const payload = {
                 date: document.getElementById('formDate').value,
                 stationName: document.getElementById('formStation').value.toUpperCase(),
                 mada: Number(document.getElementById('formMada').value) || 0,
                 visa: Number(document.getElementById('formVisa').value) || 0,
                 master: Number(document.getElementById('formMaster').value) || 0,
-                action: editIdx === "" ? "add" : "edit", index: editIdx
+                action: "add"
             };
+            
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-            setTimeout(() => { closeModal(); loadData(); btn.innerText = "Save Record"; btn.disabled = false; }, 2000);
+            setTimeout(() => { closeModal(); location.reload(); }, 1500);
         };
 
-        async function deleteRow(idx) {
-            if(!confirm("Are you sure?")) return;
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
-            setTimeout(loadData, 1000);
-        }
-
-        function generateReport() {
-            const mVal = document.getElementById('reportMonth').value;
-            const reportTable = document.getElementById('reportTableBody');
-            reportTable.innerHTML = "";
-            cachedData.forEach(row => {
-                const d = new Date(row.date), m = d.toISOString().substring(0, 7);
-                if (mVal && m === mVal) {
-                    const ma=parseFloat(row.mada||0), vi=parseFloat(row.visa||0), mas=parseFloat(row.master||0);
-                    const fee=(ma*0.01)+(vi*0.0275)+(mas*0.0275), gross=ma+vi+mas, net=gross-fee;
-                    reportTable.innerHTML += `<tr class="border-b"><td class="p-3">${d.toLocaleDateString()}</td><td class="p-3 font-bold uppercase">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${fee.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
-                }
-            });
-        }
-
-        function openModal(idx = null) {
-            document.getElementById('entryModal').classList.add('active');
-            if(idx !== null) {
-                const r = cachedData[idx];
-                document.getElementById('editIndex').value = idx;
-                document.getElementById('formDate').value = new Date(r.date).toISOString().split('T')[0];
-                document.getElementById('formStation').value = r.stationname;
-                document.getElementById('formMada').value = r.mada; document.getElementById('formVisa').value = r.visa; document.getElementById('formMaster').value = r.master;
-            } else { document.getElementById('dataForm').reset(); document.getElementById('editIndex').value = ""; }
-        }
+        function openModal() { document.getElementById('entryModal').classList.add('active'); }
         function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
-        function openReportModal() { document.getElementById('reportModal').classList.add('active'); }
-        function closeReportModal() { document.getElementById('reportModal').classList.remove('active'); }
+        
         window.onload = loadData;
     </script>
 </body>
