@@ -3,75 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Management Pro</title>
+    <title>Shar Petroleum - Pro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-bottom: 4px solid; }
-        #modal { display: none; }
+        
+        /* সম্পূর্ণ লেআউট */
+        .page-container { display: flex; height: 100vh; overflow: hidden; }
+        
+        /* সাইডবার (স্ক্রিনশটের মতো সিলভার কালার) */
+        .sidebar { background-color: #f0f1f5; width: 260px; height: 100vh; padding: 20px 0; border-right: 1px solid #e5e7eb; overflow-y: auto; }
+        .sidebar-logo { text-align: center; margin-bottom: 25px; padding: 0 15px; }
+        .sidebar-logo-text { font-size: 16px; font-weight: 800; color: #1e3a8a; font-style: italic; text-transform: uppercase; letter-spacing: -1px; }
+        .sidebar-sub-logo-text { font-size: 8px; color: #4b5563; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .nav-link { display: flex; align-items: center; padding: 10px 20px; font-size: 12px; font-weight: 500; color: #4b5563; cursor: pointer; transition: all 0.2s; }
+        .nav-link:hover { background-color: #e5e7ff; color: #4f46e5; }
+        .nav-link-active { background-color: #e5e7ff; color: #4f46e5; font-weight: 600; }
+        .nav-icon { margin-right: 12px; font-size: 14px; width: 20px; text-align: center; }
+        
+        /* মেইন কন্টেন্ট (ডানপাশের অংশ) */
+        .main-content { flex: 1; height: 100vh; position: relative; overflow-y: auto; }
+        
+        /* ব্যাকগ্রাউন্ড ইমেজ (স্ক্রিনশটের মতো পেট্রোল পাম্প) */
+        .background-image {
+            position: fixed;
+            top: 0; left: 260px; right: 0; bottom: 0;
+            background-image: url('https://images.unsplash.com/photo-1610492167761-9c6a7e0c4060?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15; /* ইমেজটি আবছা রাখার জন্য */
+            z-index: 1;
+        }
+        
+        /* কন্টেন্ট এরিয়া (ইমেজের উপরে) */
+        .content-area { position: relative; z-index: 2; padding: 30px; }
+        
+        /* কন্টেন্ট বক্স (ইমেজের উপরে সাদা কার্ড) */
+        .content-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-bottom: 4px solid #1e3a8a; }
+        
+        /* এন্ট্রি ফর্মের জন্য স্টাইল */
+        #entryModal { display: none; }
+        #entryModal.active { display: flex; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body>
 
-    <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-2xl font-black text-gray-800 uppercase italic tracking-tighter">Shar Petroleum</h1>
-                <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Advanced Analytics Dashboard</p>
+    <div class="page-container">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-text">Shar Petroleum</div>
+                <div class="sidebar-sub-logo-text">Management System</div>
             </div>
-            <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold shadow-lg hover:bg-blue-700 transition uppercase">New Entry</button>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
-            <div class="stat-card border-blue-600">
-                <p class="text-gray-400 text-[10px] font-bold uppercase italic">Total Gross</p>
-                <h3 id="totalGross" class="text-2xl font-black text-blue-900">0.00 SR</h3>
-            </div>
-            <div class="stat-card border-red-500">
-                <p class="text-gray-400 text-[10px] font-bold uppercase italic">Total Bank Fee</p>
-                <h3 id="totalFee" class="text-2xl font-black text-red-500">0.00 SR</h3>
-            </div>
-            <div class="stat-card border-green-500">
-                <p class="text-gray-400 text-[10px] font-bold uppercase italic">Net Sales</p>
-                <h3 id="totalNet" class="text-2xl font-black text-green-600">0.00 SR</h3>
-            </div>
+            
+            <nav>
+                <a onclick="location.reload()" class="nav-link nav-link-active"><i class="fas fa-th-large nav-icon"></i> Dashboard</a>
+                <a onclick="openModal()" class="nav-link"><i class="fas fa-file-invoice nav-icon"></i> Master Data Entry</a>
+                <a class="nav-link"><i class="fas fa-file-contract nav-icon"></i> Tax Invoice</a>
+                <a class="nav-link"><i class="fas fa-receipt nav-icon"></i> TDS-Summary</a>
+                <a class="nav-link"><i class="fas fa-coins nav-icon"></i> Shabaka Data</a>
+                <a class="nav-link"><i class="fas fa-chart-line nav-icon"></i> Vat Report</a>
+                <a onclick="openModal()" class="nav-link font-bold text-blue-700"><i class="fas fa-plus-circle nav-icon"></i> New Data Entry</a>
+            </nav>
         </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border mb-8">
-            <h2 class="text-xs font-bold uppercase text-gray-500 mb-4 italic">Sales Overview (Net Total per Station)</h2>
-            <canvas id="salesChart" style="max-height: 300px;"></canvas>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-            <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
-                <h2 class="text-xs font-bold uppercase text-gray-500">Sales Records</h2>
-                <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search Station..." class="border rounded-lg px-3 py-1 text-xs outline-none w-48">
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-[11px]">
-                    <thead class="bg-gray-100 text-gray-500 uppercase text-[9px] font-bold">
-                        <tr>
-                            <th class="p-4">Date</th>
-                            <th class="p-4">Station Name</th>
-                            <th class="p-4">Mada (1%)</th>
-                            <th class="p-4">Visa (2.75%)</th>
-                            <th class="p-4">Master (2.75%)</th>
-                            <th class="p-4 font-black text-black">Net Total</th>
-                            <th class="p-4 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-50 italic font-medium"></tbody>
-                </table>
+        
+        <div class="main-content">
+            <div class="background-image"></div>
+            
+            <div class="content-area">
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Welcome,</p>
+                        <h1 class="text-xl font-black text-gray-800 uppercase italic tracking-tighter">Rakibul Islam Dashboard</h1>
+                    </div>
+                    <button onclick="openModal()" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-xs font-bold uppercase hover:bg-blue-700 transition">New Entry</button>
+                </header>
+                
+                <div class="content-box mb-8">
+                    <h2 class="text-xs font-bold uppercase text-gray-500 mb-4 italic">Quick Sales Stats</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase italic">Total Gross</p>
+                            <h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3>
+                        </div>
+                        <div class="bg-red-50/50 p-4 rounded-lg border border-red-100">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase italic">Total Bank Fee</p>
+                            <h3 id="totalFee" class="text-xl font-black text-red-500">0.00 SR</h3>
+                        </div>
+                        <div class="bg-green-50/50 p-4 rounded-lg border border-green-100">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase italic">Net Sales</p>
+                            <h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-box overflow-hidden">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                        <h2 class="text-xs font-bold uppercase text-gray-500">Sales Records</h2>
+                        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search Station..." class="border rounded-lg px-3 py-1 text-xs outline-none w-48 bg-gray-50">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-[11px]">
+                            <thead class="bg-gray-100 text-gray-500 uppercase text-[9px] font-bold">
+                                <tr><th class="p-4">Date</th><th class="p-4">Station</th><th class="p-4">Mada (1%)</th><th class="p-4">Visa (2.75%)</th><th class="p-4">Master (2.75%)</th><th class="p-4 font-black text-black">Net Total</th><th class="p-4 text-center">Actions</th></tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-50 italic font-medium"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-center justify-center z-50 p-4">
+    
+    <div id="entryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white p-8 rounded-2xl w-full max-w-sm shadow-2xl">
-            <h2 id="modalTitle" class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">New Entry</h2>
+            <h2 id="modalTitle" class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">Record Entry</h2>
             <form id="dataForm" class="space-y-4">
                 <input type="hidden" id="editIndex">
                 <div><label class="text-[10px] font-bold text-slate-400">Date</label><input type="date" id="formDate" required class="w-full p-2 bg-gray-50 border rounded outline-none"></div>
@@ -83,41 +131,35 @@
                 </div>
                 <div class="flex gap-2 mt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 py-2 text-gray-400 font-bold uppercase text-[10px]">Cancel</button>
-                    <button type="submit" id="saveBtn" class="flex-1 py-2 bg-blue-600 text-white rounded font-bold uppercase text-[10px]">Save Changes</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-2 bg-blue-600 text-white rounded font-bold uppercase text-[10px]">Save Record</button>
                 </div>
             </form>
         </div>
     </div>
-
+    
     <script>
+        // আপনার নতুন আপডেট করা লিঙ্ক
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUSfER5aUJT_HIzwZdGygH5A_8NRABKVl8vmsL47NLMqBNZjzcTSmci8e9qZq2R4zd/exec";
         let cachedData = [];
-        let salesChart;
-
+        
         function loadData() {
             const script = document.createElement('script');
             script.src = `${SCRIPT_URL}?callback=handleResponse`;
             document.body.appendChild(script);
         }
-
+        
         function handleResponse(data) {
             cachedData = data;
             const body = document.getElementById('tableBody');
             body.innerHTML = "";
             let gT=0, fT=0, nT=0;
-            let chartLabels = [];
-            let chartValues = [];
-
             data.slice().reverse().forEach((row, index) => {
                 const actualIndex = data.length - 1 - index;
                 const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
                 const fee = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
                 const gross = m + v + ms, net = gross - fee;
-                
                 gT += gross; fT += fee; nT += net;
-                chartLabels.push(row.stationname);
-                chartValues.push(net.toFixed(2));
-
+                
                 body.innerHTML += `
                     <tr class="hover:bg-blue-50/50">
                         <td class="p-4 text-gray-400 italic">${new Date(row.date).toLocaleDateString()}</td>
@@ -125,44 +167,19 @@
                         <td class="p-4 text-blue-600">${m.toFixed(2)}</td>
                         <td class="p-4">${v.toFixed(2)}</td>
                         <td class="p-4 text-orange-400">${ms.toFixed(2)}</td>
-                        <td class="p-4 font-black text-slate-900 border-l bg-gray-50/50">${net.toFixed(2)}</td>
+                        <td class="p-4 font-black text-slate-900 border-l bg-gray-50/30">${net.toFixed(2)}</td>
                         <td class="p-4 text-center">
                             <button onclick="editRow(${actualIndex})" class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button>
                             <button onclick="deleteRow(${actualIndex})" class="text-red-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
-            
             document.getElementById('totalGross').innerText = gT.toFixed(2) + " SR";
             document.getElementById('totalFee').innerText = fT.toFixed(2) + " SR";
             document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
-            
-            updateChart(chartLabels.reverse(), chartValues.reverse());
         }
-
-        function updateChart(labels, values) {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            if (salesChart) salesChart.destroy();
-            salesChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Net Sales (SR)',
-                        data: values,
-                        backgroundColor: '#4f46e5',
-                        borderRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
-
-        // --- এডিট, ডিলিট এবং অন্যান্য ফাংশন --- (আগের মতোই থাকবে)
+        
+        // --- এডিট, ডিলিট এবং অন্যান্য ফাংশন (আগের মতোই থাকবে) ---
         function editRow(idx) {
             const r = cachedData[idx];
             document.getElementById('editIndex').value = idx;
@@ -172,15 +189,15 @@
             document.getElementById('formVisa').value = r.visa;
             document.getElementById('formMaster').value = r.master;
             document.getElementById('modalTitle').innerText = "Edit Record";
-            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('entryModal').classList.add('active');
         }
-
+        
         async function deleteRow(idx) {
             if(!confirm("Are you sure?")) return;
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
             setTimeout(() => { location.reload(); }, 1000);
         }
-
+        
         document.getElementById('dataForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
@@ -198,14 +215,14 @@
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
             setTimeout(() => { location.reload(); }, 1500);
         };
-
+        
         function openModal() { 
             document.getElementById('dataForm').reset();
             document.getElementById('editIndex').value = "";
-            document.getElementById('modalTitle').innerText = "New Entry";
-            document.getElementById('modal').style.display = 'flex'; 
+            document.getElementById('modalTitle').innerText = "New Record";
+            document.getElementById('entryModal').classList.add('active'); 
         }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
         
         function searchTable() {
             let input = document.getElementById("searchInput").value.toUpperCase();
@@ -215,7 +232,7 @@
                 row.style.display = td && td.innerText.toUpperCase().includes(input) ? "" : "none";
             });
         }
-
+        
         window.onload = loadData;
     </script>
 </body>
