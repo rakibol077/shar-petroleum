@@ -16,7 +16,6 @@
         .nav-item:hover { background: #eeefff; color: #6366f1; }
         .nav-active { background: #e0e2ff; color: #4f46e5; border-right: 4px solid #4f46e5; }
         .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        /* গ্রাফের জন্য স্টাইল */
         .chart-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; }
         #entryModal, #reportModal { display: none; }
         #entryModal.active, #reportModal.active { display: flex; }
@@ -52,8 +51,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="stat-card border-b-4 border-blue-600 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Gross</p><h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-red-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total VAT</p><h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-green-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
+            <div class="stat-card border-b-4 border-red-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Bank Fee (VAT)</p><h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3></div>
+            <div class="stat-card border-b-4 border-green-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net Sales</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
         </div>
 
         <div class="chart-card">
@@ -70,9 +69,9 @@
                     <tr>
                         <th class="p-4">Date</th>
                         <th class="p-4">Station Name</th>
-                        <th class="p-4 text-blue-600">Mada</th>
-                        <th class="p-4">Visa</th>
-                        <th class="p-4">Master</th>
+                        <th class="p-4 text-blue-600">Mada (1%)</th>
+                        <th class="p-4 text-slate-600">Visa (2.75%)</th>
+                        <th class="p-4 text-orange-400">Master (2.75%)</th>
                         <th class="p-4 font-black text-slate-900">Net Total</th>
                         <th class="p-4 text-center">Actions</th>
                     </tr>
@@ -110,7 +109,7 @@
                             <th class="p-3">Date</th>
                             <th class="p-3">Station</th>
                             <th class="p-3">Gross</th>
-                            <th class="p-3">VAT (15%)</th>
+                            <th class="p-3">Fee (VAT)</th>
                             <th class="p-3 font-bold">Net Total</th>
                         </tr>
                     </thead>
@@ -154,7 +153,7 @@
                 const data = await res.json();
                 cachedData = data;
                 renderTable(data);
-                renderChart(data); // চার্ট রেন্ডার ফাংশন
+                renderChart(data);
             } catch(e) { console.error("Error!"); }
         }
 
@@ -165,9 +164,20 @@
 
             data.slice().reverse().forEach((row, index) => {
                 const actualIndex = data.length - 1 - index;
-                const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
-                const gross = m + v + ms, net = gross / 1.15, vat = gross - net;
-                gT += gross; vT += vat; nT += net;
+                const m = parseFloat(row.mada || 0);
+                const v = parseFloat(row.visa || 0);
+                const ms = parseFloat(row.master || 0);
+
+                // New logic: Mada 1%, Visa 2.75%, Master 2.75%
+                const madaVat = m * 0.01;
+                const visaVat = v * 0.0275;
+                const masterVat = ms * 0.0275;
+
+                const gross = m + v + ms;
+                const vatTotal = madaVat + visaVat + masterVat;
+                const net = gross - vatTotal;
+
+                gT += gross; vT += vatTotal; nT += net;
 
                 body.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition border-b">
@@ -188,7 +198,6 @@
             document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
         }
 
-        // --- গ্রাফ লজিক ---
         function renderChart(data) {
             const last7Records = data.slice(-7);
             const labels = last7Records.map(r => new Date(r.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}));
@@ -220,7 +229,6 @@
             });
         }
 
-        // --- অন্যান্য ফাংশন আগের মতোই ---
         function generateReport() {
             const monthVal = document.getElementById('reportMonth').value;
             const dayVal = document.getElementById('reportDay').value;
@@ -228,6 +236,7 @@
             const footer = document.getElementById('reportFooter');
             reportTable.innerHTML = "";
             let rGross=0, rVat=0, rNet=0;
+            
             cachedData.forEach(row => {
                 const rowDateObj = new Date(row.date);
                 const rowMonth = rowDateObj.toISOString().substring(0, 7);
@@ -235,9 +244,20 @@
                 let match = false;
                 if (dayVal && rowDay === dayVal) match = true;
                 else if (monthVal && rowMonth === monthVal && !dayVal) match = true;
+                
                 if (match) {
-                    const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
-                    const gross = m+v+ms, net = gross/1.15, vat = gross-net;
+                    const m = parseFloat(row.mada || 0);
+                    const v = parseFloat(row.visa || 0);
+                    const ms = parseFloat(row.master || 0);
+
+                    const madaV = m * 0.01;
+                    const visaV = v * 0.0275;
+                    const masterV = ms * 0.0275;
+
+                    const gross = m+v+ms;
+                    const vat = madaV + visaV + masterV;
+                    const net = gross - vat;
+
                     rGross += gross; rVat += vat; rNet += net;
                     reportTable.innerHTML += `<tr><td class="p-3">${rowDay}</td><td class="p-3 uppercase font-bold">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${vat.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
                 }
@@ -281,7 +301,9 @@
                 document.getElementById('editIndex').value = idx;
                 if(r.date) document.getElementById('formDate').value = new Date(r.date).toISOString().split('T')[0];
                 document.getElementById('formStation').value = r.stationname || "";
-                document.getElementById('formMada').value = r.mada || 0; document.getElementById('formVisa').value = r.visa || 0; document.getElementById('formMaster').value = r.master || 0;
+                document.getElementById('formMada').value = r.mada || 0; 
+                document.getElementById('formVisa').value = r.visa || 0; 
+                document.getElementById('formMaster').value = r.master || 0;
             } else {
                 document.getElementById('modalTitle').innerText = "New Record";
                 document.getElementById('dataForm').reset();
