@@ -125,11 +125,13 @@
 
         async function loadData() {
             try {
-                const res = await fetch(SCRIPT_URL);
+                // Cache refresh trick (?t=...)
+                const res = await fetch(SCRIPT_URL + "?t=" + new Date().getTime());
                 const data = await res.json();
                 cachedData = data;
                 updateStationDropdown(data);
                 filterData();
+                console.log("Data Refresh Success");
             } catch(e) { console.error("Error loading data"); }
         }
 
@@ -147,8 +149,8 @@
             const stationVal = document.getElementById('stationFilter').value;
             
             let filtered = cachedData.filter(item => {
-                const matchSearch = item.stationname.toLowerCase().includes(searchText) || item.date.includes(searchText);
-                const matchStation = (stationVal === "ALL") || (item.stationname.toUpperCase() === stationVal);
+                const matchSearch = (item.stationname || "").toLowerCase().includes(searchText) || (item.date || "").includes(searchText);
+                const matchStation = (stationVal === "ALL") || ((item.stationname || "").toUpperCase() === stationVal);
                 return matchSearch && matchStation;
             });
 
@@ -162,7 +164,7 @@
             body.innerHTML = "";
             let gT=0, vT=0, nT=0;
 
-            data.slice().reverse().forEach((row, index) => {
+            data.slice().reverse().forEach((row) => {
                 const actualIndex = cachedData.indexOf(row);
                 const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
                 const gross = m + v + ms, net = gross / 1.15, vat = gross - net;
@@ -197,34 +199,49 @@
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{ label: 'Sales', data: values, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4, borderWidth: 3 }]
+                    datasets: [{ label: 'Gross Sales', data: values, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4, borderWidth: 3 }]
                 },
                 options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
             });
         }
 
-        function generateReport() {
-            const monthVal = document.getElementById('reportMonth').value;
-            const dayVal = document.getElementById('reportDay').value;
-            const reportTable = document.getElementById('reportTableBody');
-            const footer = document.getElementById('reportFooter');
-            reportTable.innerHTML = "";
-            let rGross=0, rVat=0, rNet=0;
+        document.getElementById('dataForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const editIdx = document.getElementById('editIndex').value;
+            btn.innerText = "Saving..."; btn.disabled = true;
 
-            cachedData.forEach(row => {
-                const rowDateObj = new Date(row.date);
-                const rowMonth = rowDateObj.toISOString().substring(0, 7);
-                const rowDay = rowDateObj.toISOString().substring(0, 10);
-                if ((dayVal && rowDay === dayVal) || (monthVal && rowMonth === monthVal && !dayVal)) {
-                    const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
-                    const gross = m+v+ms, net = gross/1.15, vat = gross-net;
-                    rGross += gross; rVat += vat; rNet += net;
-                    reportTable.innerHTML += `<tr><td class="p-3">${rowDay}</td><td class="p-3 uppercase font-bold text-blue-900">${row.stationname}</td><td class="p-3 font-medium">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${vat.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
-                }
-            });
-            footer.innerHTML = `<td colspan="2" class="p-3 text-right">TOTAL:</td><td class="p-3 text-blue-900 font-black">${rGross.toFixed(2)}</td><td class="p-3 text-red-500">${rVat.toFixed(2)}</td><td class="p-3 text-green-700">${rNet.toFixed(2)}</td>`;
+            const payload = {
+                date: document.getElementById('formDate').value,
+                stationName: document.getElementById('formStation').value.toUpperCase(),
+                mada: Number(document.getElementById('formMada').value) || 0,
+                visa: Number(document.getElementById('formVisa').value) || 0,
+                master: Number(document.getElementById('formMaster').value) || 0,
+                action: editIdx === "" ? "add" : "edit",
+                index: editIdx
+            };
+
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
+                // ২ সেকেন্ড পর ডাটা লোড করা নিশ্চিত করতে
+                setTimeout(async () => {
+                    closeModal();
+                    await loadData();
+                    btn.innerText = "Save"; btn.disabled = false;
+                }, 2000);
+            } catch (error) {
+                alert("Error saving data!");
+                btn.disabled = false;
+            }
+        };
+
+        async function deleteRow(idx) {
+            if(!confirm("Are you sure?")) return;
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
+            setTimeout(loadData, 1500);
         }
 
+        // Common UI Helpers
         function openModal(idx = null) {
             const modal = document.getElementById('entryModal');
             modal.classList.add('active');
@@ -241,33 +258,30 @@
                 document.getElementById('editIndex').value = "";
             }
         }
-
-        document.getElementById('dataForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "Saving..."; btn.disabled = true;
-            const payload = {
-                date: document.getElementById('formDate').value,
-                stationName: document.getElementById('formStation').value.toUpperCase(),
-                mada: Number(document.getElementById('formMada').value) || 0,
-                visa: Number(document.getElementById('formVisa').value) || 0,
-                master: Number(document.getElementById('formMaster').value) || 0,
-                action: document.getElementById('editIndex').value === "" ? "add" : "edit",
-                index: document.getElementById('editIndex').value
-            };
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-            setTimeout(() => { closeModal(); loadData(); btn.innerText = "Save"; btn.disabled = false; }, 1200);
-        };
-
-        async function deleteRow(idx) {
-            if(!confirm("Are you sure?")) return;
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
-            setTimeout(loadData, 1000);
-        }
-
         function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
         function openReportModal() { document.getElementById('reportModal').classList.add('active'); }
         function closeReportModal() { document.getElementById('reportModal').classList.remove('active'); }
+        
+        // Report Logic (unchanged but integrated)
+        function generateReport() {
+            const monthVal = document.getElementById('reportMonth').value;
+            const dayVal = document.getElementById('reportDay').value;
+            const reportTable = document.getElementById('reportTableBody');
+            const footer = document.getElementById('reportFooter');
+            reportTable.innerHTML = "";
+            let rG=0, rV=0, rN=0;
+            cachedData.forEach(row => {
+                const rD = new Date(row.date).toISOString().split('T')[0];
+                if ((dayVal && rD === dayVal) || (monthVal && rD.startsWith(monthVal))) {
+                    const gross = parseFloat(row.mada||0)+parseFloat(row.visa||0)+parseFloat(row.master||0);
+                    const net = gross/1.15, vat = gross-net;
+                    rG+=gross; rV+=vat; rN+=net;
+                    reportTable.innerHTML += `<tr><td class="p-3">${rD}</td><td class="p-3 uppercase">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${vat.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
+                }
+            });
+            footer.innerHTML = `<td colspan="2" class="p-3 text-right">TOTAL:</td><td class="p-3">${rG.toFixed(2)}</td><td class="p-3">${rV.toFixed(2)}</td><td class="p-3">${rN.toFixed(2)}</td>`;
+        }
+
         window.onload = loadData;
     </script>
 </body>
