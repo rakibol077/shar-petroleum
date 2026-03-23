@@ -3,112 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Dashboard</title>
+    <title>Shar Petroleum Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0f4f8; }
-        .glass-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .sidebar { background-color: #f9f9ff; height: 100vh; width: 260px; position: fixed; border-right: 1px solid #e5e7eb; }
+        .nav-item { padding: 12px 24px; color: #4b5563; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; transition: 0.3s; }
+        .nav-item:hover { background: #eeefff; color: #6366f1; }
+        .nav-active { background: #e0e2ff; color: #4f46e5; border-right: 4px solid #4f46e5; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .hero-section { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1542211432-843849302604?auto=format&fit=crop&q=80&w=2000'); background-size: cover; background-position: center; border-radius: 15px; height: 250px; margin-top: 20px; display: flex; align-items: flex-end; padding: 30px; color: white; }
     </style>
 </head>
-<body class="p-5 md:p-10">
+<body>
 
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
+    <div class="sidebar overflow-y-auto">
+        <div class="p-6 flex flex-col items-center">
+            <div class="w-20 h-20 bg-[#1e293b] rounded-full flex items-center justify-center mb-2 overflow-hidden border-2 border-blue-500">
+                <i class="fas fa-burn text-orange-400 text-3xl"></i>
+            </div>
+            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-tighter">Shar Petroleum</h2>
+        </div>
+
+        <nav class="mt-4">
+            <a href="#" class="nav-item nav-active"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="#" class="nav-item"><i class="fas fa-database"></i> Master Data Entry</a>
+            <a href="#" class="nav-item"><i class="fas fa-plus-circle"></i> All Creation <i class="fas fa-chevron-down ml-auto text-[10px]"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-file-invoice"></i> Tax Invoice</a>
+            <a href="#" class="nav-item"><i class="fas fa-list-alt"></i> TDS-Summary</a>
+            <a href="#" class="nav-item"><i class="fas fa-network-wired"></i> Shabaka Data</a>
+            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i> Company Wise Sales</a>
+            <a href="#" class="nav-item"><i class="fas fa-gas-pump"></i> Station Report <i class="fas fa-chevron-down ml-auto text-[10px]"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-file-pdf"></i> Vat Report <i class="fas fa-chevron-down ml-auto text-[10px]"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-users"></i> Users <i class="fas fa-chevron-down ml-auto text-[10px]"></i></a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-bold text-gray-800">Welcome to <span class="text-blue-600">Shar Petroleum</span> Dashboard</h1>
+            <div class="flex items-center gap-4">
+                <i class="fas fa-bell text-gray-400"></i>
+                <div class="w-8 h-8 rounded-full bg-blue-500"></div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm mb-1">Total Mada Sales</p>
+                <h3 id="totalMada" class="text-2xl font-bold text-blue-600">0.00 SR</h3>
+            </div>
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm mb-1">Total VAT (15%)</p>
+                <h3 id="totalVat" class="text-2xl font-bold text-red-500">0.00 SR</h3>
+            </div>
+            <div class="stat-card">
+                <p class="text-gray-500 text-sm mb-1">Recent Activity</p>
+                <h3 class="text-sm font-medium text-green-600 italic">Live Syncing...</h3>
+            </div>
+        </div>
+
+        <div class="hero-section shadow-lg">
             <div>
-                <h1 class="text-2xl font-black text-blue-900 uppercase italic">Shar Petroleum</h1>
-                <p class="text-xs text-blue-400 font-bold uppercase tracking-widest">Live Dashboard</p>
-            </div>
-            <button onclick="location.reload()" class="p-3 bg-white rounded-full shadow-sm hover:shadow-md transition">
-                <i class="fas fa-sync-alt text-blue-600"></i>
-            </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="glass-card p-6 border-l-4 border-blue-600">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Gross Sales</p>
-                <h2 id="totalGross" class="text-2xl font-black text-slate-800">0.00 SR</h2>
-            </div>
-            <div class="glass-card p-6 border-l-4 border-red-500">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Total VAT (15%)</p>
-                <h2 id="totalTax" class="text-2xl font-black text-red-600">0.00 SR</h2>
-            </div>
-            <div class="glass-card p-6 border-l-4 border-green-500">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Net Amount</p>
-                <h2 id="totalNet" class="text-2xl font-black text-green-600">0.00 SR</h2>
+                <h2 class="text-3xl font-bold mb-2">Shar Petroleum</h2>
+                <p class="text-sm text-gray-200">Efficient Management for Your Fuel Business</p>
             </div>
         </div>
 
-        <div class="glass-card overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-slate-50 uppercase text-[10px] text-slate-400 font-bold">
+        <div class="bg-white mt-8 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b bg-gray-50">
+                <h4 class="font-bold text-gray-700">Latest Transactions</h4>
+            </div>
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 text-gray-400 font-medium uppercase text-[10px]">
                     <tr>
-                        <th class="p-6">Date</th>
-                        <th class="p-6">Station Name</th>
-                        <th class="p-6">Mada</th>
-                        <th class="p-6">Visa</th>
-                        <th class="p-6">Master</th>
-                        <th class="p-6 text-slate-900">Net Total</th>
+                        <th class="p-4">Date</th>
+                        <th class="p-4">Station Name</th>
+                        <th class="p-4">Mada</th>
+                        <th class="p-4">Visa</th>
+                        <th class="p-4">Total Net</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="text-xs font-bold divide-y divide-slate-100">
+                <tbody id="tableBody" class="divide-y divide-gray-100 font-medium">
                     </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // আপনার এই লিঙ্কটি একদম ঠিক আছে, এটা পরিবর্তন করার দরকার নেই
+        // আপনার এই URL টি একদম ঠিক আছে
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtkGvsL_IaxaKvJ2a8pIq_rxaKxBtC04Z6-g2s5kcfXeHlzc_Fw6BHLoCs9BmKo8G8/exec";
 
-        async function fetchData() {
+        async function loadData() {
             try {
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
-                renderTable(data);
-            } catch (error) {
-                console.error("Error loading data:", error);
-            }
+                
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = "";
+                let totalMada = 0, totalVat = 0;
+
+                data.slice().reverse().forEach(row => {
+                    const m = parseFloat(row.mada || 0);
+                    const v = parseFloat(row.visa || 0);
+                    const ms = parseFloat(row.master || 0);
+                    const gross = m + v + ms;
+                    const net = gross / 1.15;
+                    const vat = gross - net;
+
+                    totalMada += m;
+                    totalVat += vat;
+
+                    tableBody.innerHTML += `
+                        <tr class="hover:bg-blue-50 transition">
+                            <td class="p-4 text-gray-500">${new Date(row.date).toLocaleDateString()}</td>
+                            <td class="p-4 font-bold text-slate-800 uppercase">${row.stationname || "N/A"}</td>
+                            <td class="p-4 text-blue-600">${m.toFixed(2)}</td>
+                            <td class="p-4">${v.toFixed(2)}</td>
+                            <td class="p-4 font-bold text-gray-900">${net.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('totalMada').innerText = totalMada.toFixed(2) + " SR";
+                document.getElementById('totalVat').innerText = totalVat.toFixed(2) + " SR";
+
+            } catch (e) { console.log("Fetch Error!"); }
         }
 
-        function renderTable(data) {
-            const body = document.getElementById('tableBody');
-            body.innerHTML = "";
-            let gTotal = 0, tVat = 0, tNet = 0;
-
-            data.slice().reverse().forEach(row => {
-                // আপনার শিটের হেডার: date, Station Name, mada, visa, master
-                const m = parseFloat(row.mada || 0);
-                const v = parseFloat(row.visa || 0);
-                const ms = parseFloat(row.master || 0);
-                const sName = row.stationname || "N/A";
-                const dStr = row.date ? new Date(row.date).toLocaleDateString('en-GB') : "---";
-
-                const gross = m + v + ms;
-                const net = gross / 1.15;
-                const vat = gross - net;
-
-                gTotal += gross; tVat += vat; tNet += net;
-
-                body.innerHTML += `
-                    <tr class="hover:bg-blue-50/30 transition">
-                        <td class="p-6 text-slate-400 font-medium">${dStr}</td>
-                        <td class="p-6 text-blue-900 uppercase italic font-black">${sName}</td>
-                        <td class="p-6 text-blue-600">${m.toFixed(2)}</td>
-                        <td class="p-6 text-slate-500">${v.toFixed(2)}</td>
-                        <td class="p-6 text-orange-400">${ms.toFixed(2)}</td>
-                        <td class="p-6 text-slate-900 font-extrabold">${net.toFixed(2)}</td>
-                    </tr>`;
-            });
-
-            document.getElementById('totalGross').innerText = gTotal.toLocaleString() + " SR";
-            document.getElementById('totalTax').innerText = tVat.toLocaleString() + " SR";
-            document.getElementById('totalNet').innerText = tNet.toLocaleString() + " SR";
-        }
-
-        // পেজ লোড হলেই ডাটা আসবে
-        window.onload = fetchData;
+        window.onload = loadData;
     </script>
 </body>
 </html>
