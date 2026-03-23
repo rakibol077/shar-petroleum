@@ -50,18 +50,9 @@
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="stat-card border-b-4 border-blue-600 text-center">
-                <p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Gross</p>
-                <h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3>
-            </div>
-            <div class="stat-card border-b-4 border-red-500 text-center">
-                <p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Bank Fee (VAT)</p>
-                <h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3>
-            </div>
-            <div class="stat-card border-b-4 border-green-500 text-center">
-                <p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net Sales</p>
-                <h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3>
-            </div>
+            <div class="stat-card border-b-4 border-blue-600 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Gross</p><h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3></div>
+            <div class="stat-card border-b-4 border-red-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Bank Fee (VAT)</p><h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3></div>
+            <div class="stat-card border-b-4 border-green-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net Sales</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
         </div>
 
         <div class="chart-card">
@@ -71,13 +62,18 @@
 
         <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
             <div class="p-4 bg-gray-50 border-b flex flex-col md:flex-row justify-between items-center gap-4">
-                <h4 class="font-bold text-xs text-gray-700 uppercase italic">Recent Transactions</h4>
-                <div class="relative w-full md:w-72">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <h4 class="font-bold text-xs text-gray-700 uppercase italic whitespace-nowrap">Filter:</h4>
+                    <select id="stationFilter" onchange="filterTable()" class="w-full md:w-48 border border-gray-200 rounded-lg text-[10px] font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 uppercase bg-white cursor-pointer transition">
+                        <option value="">All Stations</option>
+                    </select>
+                </div>
+                <div class="relative w-full md:w-64">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search text-[10px]"></i>
                     </span>
-                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search Date or Station..." 
-                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-[11px] focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search Date..." 
+                        class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-[11px] focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                 </div>
             </div>
             
@@ -104,36 +100,18 @@
                 <h2 class="text-lg font-black uppercase italic text-blue-900">Tax Invoice / Reports</h2>
                 <button onclick="closeReportModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
             </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
-                <div class="md:col-span-2">
-                    <label class="text-[9px] font-bold text-blue-600 uppercase">Select Month</label>
-                    <input type="month" id="reportMonth" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none">
-                </div>
-                <div>
-                    <label class="text-[9px] font-bold text-blue-600 uppercase">Specific Day</label>
-                    <input type="date" id="reportDay" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none">
-                </div>
-                <div class="flex items-end">
-                    <button onclick="window.print()" class="w-full bg-blue-600 text-white p-2 rounded font-bold text-[10px] uppercase shadow-md"><i class="fas fa-print mr-1"></i> Print</button>
-                </div>
+                <div class="md:col-span-2"><label class="text-[9px] font-bold text-blue-600 uppercase">Month</label><input type="month" id="reportMonth" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none"></div>
+                <div><label class="text-[9px] font-bold text-blue-600 uppercase">Day</label><input type="date" id="reportDay" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none"></div>
+                <div class="flex items-end"><button onclick="window.print()" class="w-full bg-blue-600 text-white p-2 rounded font-bold text-[10px] uppercase shadow-md"><i class="fas fa-print mr-1"></i> Print</button></div>
             </div>
-
             <div class="overflow-y-auto flex-1 border rounded-lg">
-                <table class="w-full text-left text-[11px]">
+                <table class="w-full text-left text-[11px] italic">
                     <thead class="bg-blue-900 text-white uppercase text-[9px] sticky top-0">
-                        <tr>
-                            <th class="p-3">Date</th>
-                            <th class="p-3">Station</th>
-                            <th class="p-3">Gross</th>
-                            <th class="p-3">Fee (VAT)</th>
-                            <th class="p-3 font-bold">Net Total</th>
-                        </tr>
+                        <tr><th class="p-3">Date</th><th class="p-3">Station</th><th class="p-3">Gross</th><th class="p-3">Fee (VAT)</th><th class="p-3 font-bold">Net Total</th></tr>
                     </thead>
                     <tbody id="reportTableBody" class="divide-y divide-gray-100 italic"></tbody>
-                    <tfoot class="bg-slate-50 font-black">
-                        <tr id="reportFooter"></tr>
-                    </tfoot>
+                    <tfoot class="bg-slate-50 font-black"><tr id="reportFooter"></tr></tfoot>
                 </table>
             </div>
         </div>
@@ -144,12 +122,12 @@
             <h2 id="modalTitle" class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">Record Entry</h2>
             <form id="dataForm" class="space-y-4">
                 <input type="hidden" id="editIndex">
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-3 bg-gray-50 rounded-lg"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-3 bg-gray-50 rounded-lg uppercase"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-3 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-3 bg-gray-50 rounded-lg uppercase outline-none focus:ring-2 focus:ring-blue-500"></div>
                 <div class="grid grid-cols-3 gap-2">
-                    <div><label class="text-[9px] font-bold text-blue-600">Mada</label><input type="number" step="any" id="formMada" class="w-full p-2 bg-gray-50 rounded-lg"></div>
-                    <div><label class="text-[9px] font-bold text-slate-600">Visa</label><input type="number" step="any" id="formVisa" class="w-full p-2 bg-gray-50 rounded-lg"></div>
-                    <div><label class="text-[9px] font-bold text-orange-400">Master</label><input type="number" step="any" id="formMaster" class="w-full p-2 bg-gray-50 rounded-lg"></div>
+                    <div><label class="text-[9px] font-bold text-blue-600">Mada</label><input type="number" step="any" id="formMada" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                    <div><label class="text-[9px] font-bold text-slate-600">Visa</label><input type="number" step="any" id="formVisa" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                    <div><label class="text-[9px] font-bold text-orange-400">Master</label><input type="number" step="any" id="formMaster" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
                 </div>
                 <div class="flex gap-2 mt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-[10px]">Cancel</button>
@@ -169,31 +147,34 @@
                 const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
                 cachedData = data;
+                updateStationDropdown(data);
                 renderTable(data);
                 renderChart(data);
             } catch(e) { console.error("Error loading data!"); }
         }
 
-        // সার্চ ফিল্টার ফাংশন
+        function updateStationDropdown(data) {
+            const dropdown = document.getElementById('stationFilter');
+            const stations = [...new Set(data.map(item => item.stationname.toUpperCase()))].sort();
+            dropdown.innerHTML = '<option value="">All Stations</option>';
+            stations.forEach(s => { dropdown.innerHTML += `<option value="${s}">${s}</option>`; });
+        }
+
         function filterTable() {
-            const input = document.getElementById("searchInput");
-            const filter = input.value.toUpperCase();
+            const searchText = document.getElementById("searchInput").value.toUpperCase();
+            const stationValue = document.getElementById("stationFilter").value.toUpperCase();
             const table = document.getElementById("tableBody");
             const tr = table.getElementsByTagName("tr");
 
             for (let i = 0; i < tr.length; i++) {
                 const tdDate = tr[i].getElementsByTagName("td")[0];
                 const tdStation = tr[i].getElementsByTagName("td")[1];
-                
-                if (tdDate || tdStation) {
+                if (tdDate && tdStation) {
                     const dateText = tdDate.textContent || tdDate.innerText;
                     const stationText = tdStation.textContent || tdStation.innerText;
-                    
-                    if (dateText.toUpperCase().indexOf(filter) > -1 || stationText.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
+                    const matchSearch = dateText.toUpperCase().indexOf(searchText) > -1;
+                    const matchStation = stationValue === "" || stationText.toUpperCase() === stationValue;
+                    tr[i].style.display = (matchSearch && matchStation) ? "" : "none";
                 }
             }
         }
@@ -205,19 +186,10 @@
 
             data.slice().reverse().forEach((row, index) => {
                 const actualIndex = data.length - 1 - index;
-                const m = parseFloat(row.mada || 0);
-                const v = parseFloat(row.visa || 0);
-                const ms = parseFloat(row.master || 0);
-
-                const mFee = m * 0.01;
-                const vFee = v * 0.0275;
-                const msFee = ms * 0.0275;
-
-                const gross = m + v + ms;
-                const totalFee = mFee + vFee + msFee;
-                const net = gross - totalFee;
-
-                gT += gross; vT += totalFee; nT += net;
+                const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
+                const fee = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
+                const gross = m+v+ms, net = gross - fee;
+                gT += gross; vT += fee; nT += net;
 
                 body.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition border-b">
@@ -236,66 +208,37 @@
             document.getElementById('totalGross').innerText = gT.toFixed(2) + " SR";
             document.getElementById('totalVat').innerText = vT.toFixed(2) + " SR";
             document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
-            filterTable(); // রেন্ডার হওয়ার পর ফিল্টার বজায় রাখা
+            filterTable();
         }
 
         function renderChart(data) {
-            const last7Records = data.slice(-7);
-            const labels = last7Records.map(r => new Date(r.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}));
-            const values = last7Records.map(r => (parseFloat(r.mada||0) + parseFloat(r.visa||0) + parseFloat(r.master||0)));
-
+            const last7 = data.slice(-7);
+            const labels = last7.map(r => new Date(r.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}));
+            const values = last7.map(r => (parseFloat(r.mada||0) + parseFloat(r.visa||0) + parseFloat(r.master||0)));
             const ctx = document.getElementById('salesChart').getContext('2d');
             if(salesChart) salesChart.destroy();
-
             salesChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Gross Sales',
-                        data: values,
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4
-                    }]
+                    datasets: [{ label: 'Gross Sales', data: values, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4, borderWidth: 3 }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
-                }
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
             });
         }
 
         function generateReport() {
-            const monthVal = document.getElementById('reportMonth').value;
-            const dayVal = document.getElementById('reportDay').value;
-            const reportTable = document.getElementById('reportTableBody');
-            const footer = document.getElementById('reportFooter');
+            const monthVal = document.getElementById('reportMonth').value, dayVal = document.getElementById('reportDay').value;
+            const reportTable = document.getElementById('reportTableBody'), footer = document.getElementById('reportFooter');
             reportTable.innerHTML = "";
             let rGross=0, rVat=0, rNet=0;
-            
             cachedData.forEach(row => {
-                const rowDateObj = new Date(row.date);
-                const rowMonth = rowDateObj.toISOString().substring(0, 7);
-                const rowDay = rowDateObj.toISOString().substring(0, 10);
-                let match = false;
-                if (dayVal && rowDay === dayVal) match = true;
-                else if (monthVal && rowMonth === monthVal && !dayVal) match = true;
-                
-                if (match) {
-                    const m = parseFloat(row.mada || 0);
-                    const v = parseFloat(row.visa || 0);
-                    const ms = parseFloat(row.master || 0);
-                    const fee = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
-                    const gross = m + v + ms;
-                    const net = gross - fee;
-
+                const d = new Date(row.date), m = d.toISOString().substring(0, 7), dy = d.toISOString().substring(0, 10);
+                if ((dayVal && dy === dayVal) || (monthVal && m === monthVal && !dayVal)) {
+                    const ma = parseFloat(row.mada||0), vi = parseFloat(row.visa||0), mas = parseFloat(row.master||0);
+                    const fee = (ma * 0.01) + (vi * 0.0275) + (mas * 0.0275), gross = ma+vi+mas, net = gross-fee;
                     rGross += gross; rVat += fee; rNet += net;
-                    reportTable.innerHTML += `<tr><td class="p-3">${rowDay}</td><td class="p-3 uppercase font-bold">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${fee.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
+                    reportTable.innerHTML += `<tr><td class="p-3">${dy}</td><td class="p-3 uppercase font-bold">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${fee.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
                 }
             });
             footer.innerHTML = `<td colspan="2" class="p-3 text-right font-black">TOTALS:</td><td class="p-3 text-blue-900">${rGross.toFixed(2)}</td><td class="p-3 text-red-500">${rVat.toFixed(2)}</td><td class="p-3 text-green-700">${rNet.toFixed(2)}</td>`;
@@ -303,11 +246,25 @@
 
         function openReportModal() { document.getElementById('reportModal').classList.add('active'); }
         function closeReportModal() { document.getElementById('reportModal').classList.remove('active'); }
-        
+        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
+        function openModal(idx = null) {
+            const modal = document.getElementById('entryModal');
+            modal.classList.add('active');
+            if(idx !== null) {
+                const r = cachedData[idx];
+                document.getElementById('modalTitle').innerText = "Edit Record";
+                document.getElementById('editIndex').value = idx;
+                if(r.date) document.getElementById('formDate').value = new Date(r.date).toISOString().split('T')[0];
+                document.getElementById('formStation').value = r.stationname || "";
+                document.getElementById('formMada').value = r.mada || 0; document.getElementById('formVisa').value = r.visa || 0; document.getElementById('formMaster').value = r.master || 0;
+            } else {
+                document.getElementById('modalTitle').innerText = "New Record"; document.getElementById('dataForm').reset(); document.getElementById('editIndex').value = "";
+            }
+        }
+
         document.getElementById('dataForm').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            const editIdx = document.getElementById('editIndex').value;
+            const btn = document.getElementById('saveBtn'), editIdx = document.getElementById('editIndex').value;
             btn.innerText = "Saving..."; btn.disabled = true;
             const payload = {
                 date: document.getElementById('formDate').value,
@@ -315,8 +272,7 @@
                 mada: Number(document.getElementById('formMada').value) || 0,
                 visa: Number(document.getElementById('formVisa').value) || 0,
                 master: Number(document.getElementById('formMaster').value) || 0,
-                action: editIdx === "" ? "add" : "edit",
-                index: editIdx
+                action: editIdx === "" ? "add" : "edit", index: editIdx
             };
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
             setTimeout(() => { closeModal(); loadData(); btn.innerText = "Save Record"; btn.disabled = false; }, 1500);
@@ -327,26 +283,6 @@
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
             setTimeout(loadData, 1000);
         }
-
-        function openModal(idx = null) {
-            const modal = document.getElementById('entryModal');
-            modal.classList.add('active');
-            if(idx !== null) {
-                const r = cachedData[idx];
-                document.getElementById('modalTitle').innerText = "Edit Record";
-                document.getElementById('editIndex').value = idx;
-                if(r.date) document.getElementById('formDate').value = new Date(r.date).toISOString().split('T')[0];
-                document.getElementById('formStation').value = r.stationname || "";
-                document.getElementById('formMada').value = r.mada || 0; 
-                document.getElementById('formVisa').value = r.visa || 0; 
-                document.getElementById('formMaster').value = r.master || 0;
-            } else {
-                document.getElementById('modalTitle').innerText = "New Record";
-                document.getElementById('dataForm').reset();
-                document.getElementById('editIndex').value = "";
-            }
-        }
-        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
         window.onload = loadData;
     </script>
 </body>
