@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Secured Dashboard</title>
+    <title>Shar Petroleum - Ultra Secure Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,9 +12,9 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         
         /* Login Overlay */
-        #loginOverlay { position: fixed; inset: 0; background: #1e293b; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        #loginOverlay { position: fixed; inset: 0; background: #0f172a; z-index: 1000; display: flex; align-items: center; justify-content: center; }
         
-        .page-container { display: flex; height: 100vh; overflow: hidden; }
+        .page-container { display: none; height: 100vh; overflow: hidden; } /* Hidden until login */
         .sidebar { background-color: #f0f1f5; width: 260px; height: 100vh; padding: 20px 0; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 10; }
         .sidebar-logo { text-align: center; margin-bottom: 25px; padding: 0 15px; }
         .sidebar-logo-text { font-size: 16px; font-weight: 800; color: #1e3a8a; font-style: italic; text-transform: uppercase; letter-spacing: -1px; }
@@ -34,24 +34,32 @@
         .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @media print { .sidebar, .print-hidden, .background-image, #loginOverlay { display: none !important; } .main-content { width: 100%; } }
+        @media print { .sidebar, .print-hidden, .background-image, #loginOverlay { display: none !important; } .main-content { width: 100%; } .page-container { display: block !important; } }
     </style>
 </head>
 <body>
 
     <div id="loginOverlay">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
-            <h1 class="text-xl font-black text-blue-900 mb-2 italic">SHAR PETROLEUM</h1>
-            <p class="text-[10px] text-gray-400 font-bold uppercase mb-6 tracking-widest">Security Gateway</p>
-            <input type="password" id="adminPin" placeholder="Enter Admin PIN" class="w-full p-3 border rounded-lg mb-3 text-center outline-none focus:ring-2 ring-blue-500">
-            <button onclick="checkLogin('admin')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg text-xs uppercase mb-2 hover:bg-blue-700">Admin Login</button>
-            <div class="flex items-center my-3"><hr class="flex-1"><span class="px-2 text-[10px] text-gray-300">OR</span><hr class="flex-1"></div>
-            <button onclick="checkLogin('guest')" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-lg text-xs uppercase hover:bg-gray-200">Guest Access (View Only)</button>
-            <p id="loginError" class="text-red-500 text-[10px] mt-3 hidden">Incorrect PIN! Try again.</p>
+            <h1 class="text-xl font-black text-blue-900 mb-2 italic tracking-tighter">SHAR PETROLEUM</h1>
+            <p class="text-[9px] text-gray-400 font-bold uppercase mb-6 tracking-[0.2em]">Security Access Point</p>
+            
+            <div class="mb-4">
+                <label class="text-[10px] font-bold text-gray-500 uppercase block mb-2">Enter Access PIN</label>
+                <input type="password" id="userPin" placeholder="••••••" class="w-full p-3 border-2 border-gray-100 rounded-xl mb-4 text-center text-lg font-bold tracking-widest outline-none focus:border-blue-500 transition-all">
+                
+                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-black py-3 rounded-xl text-xs uppercase shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">Verify & Enter</button>
+            </div>
+            
+            <p id="loginError" class="text-red-500 text-[10px] mt-4 font-bold uppercase hidden"><i class="fas fa-exclamation-triangle"></i> Invalid PIN! Access Denied.</p>
+            
+            <div class="mt-8 pt-4 border-t border-gray-100">
+                <p class="text-[8px] text-gray-400 font-bold uppercase">Authorized Personnel Only</p>
+            </div>
         </div>
     </div>
 
-    <div class="page-container">
+    <div class="page-container" id="mainApp">
         <div class="sidebar">
             <div class="sidebar-logo">
                 <div class="sidebar-logo-text">Shar Petroleum</div>
@@ -63,7 +71,7 @@
                 <a onclick="switchTab('tdsSummary')" class="nav-link" id="nav-tdsSummary"><i class="fas fa-chart-pie nav-icon"></i> TDS-Summary</a>
                 <a onclick="switchTab('shabakaData')" class="nav-link" id="nav-shabakaData"><i class="fas fa-coins nav-icon"></i> Shabaka Data</a>
                 <a onclick="switchTab('vatReport')" class="nav-link" id="nav-vatReport"><i class="fas fa-chart-line nav-icon"></i> Vat Report</a>
-                <button onclick="location.reload()" class="w-full text-left nav-link mt-10 text-red-400 border-t pt-4"><i class="fas fa-sign-out-alt nav-icon"></i> Logout</button>
+                <button onclick="location.reload()" class="w-full text-left nav-link mt-10 text-red-500 border-t pt-4 font-bold"><i class="fas fa-power-off nav-icon"></i> Exit / Logout</button>
             </nav>
         </div>
         
@@ -72,8 +80,8 @@
             <div class="content-area">
                 <header class="flex justify-between items-center mb-8 print-hidden">
                     <div>
-                        <p class="text-[10px] text-blue-600 font-bold uppercase">Welcome,</p>
-                        <h1 class="text-xl font-black text-gray-800 uppercase italic">Shar Petroleum Dashboard</h1>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase" id="userRoleHeader">System Portal</p>
+                        <h1 class="text-xl font-black text-gray-800 uppercase italic">Shar Petroleum</h1>
                     </div>
                     <button onclick="openModal()" class="admin-only bg-blue-600 text-white px-5 py-2 rounded-lg text-xs font-bold uppercase shadow-lg">New Entry</button>
                 </header>
@@ -81,15 +89,15 @@
                 <div id="dashboard" class="view-section active">
                     <div class="content-box">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                            <div class="bg-blue-50 p-4 rounded-lg border">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                                 <p class="text-[10px] font-bold uppercase italic text-blue-800">Total Gross</p>
                                 <h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3>
                             </div>
-                            <div class="bg-red-50 p-4 rounded-lg border">
-                                <p class="text-[10px] font-bold uppercase italic text-red-800">Total Bank Fee</p>
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                                <p class="text-[10px] font-bold uppercase italic text-red-800">Total Bank Fee (VAT)</p>
                                 <h3 id="totalFee" class="text-xl font-black text-red-600">0.00 SR</h3>
                             </div>
-                            <div class="bg-green-50 p-4 rounded-lg border">
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
                                 <p class="text-[10px] font-bold uppercase italic text-green-800">Net Sales</p>
                                 <h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3>
                             </div>
@@ -97,24 +105,45 @@
                     </div>
                     <div class="content-box overflow-hidden">
                         <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                            <h2 class="text-xs font-bold uppercase text-gray-500">Sales Records</h2>
-                            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search..." class="border rounded px-3 py-1 text-xs bg-gray-50 outline-none">
+                            <h2 class="text-xs font-bold uppercase text-gray-500">Master Sales Log</h2>
+                            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Filter by station..." class="border rounded-lg px-3 py-1 text-[11px] bg-gray-50 outline-none w-48">
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-[11px]">
                                 <thead class="bg-gray-100 text-gray-500 uppercase text-[9px]">
-                                    <tr><th class="p-3">Date</th><th class="p-3">Station</th><th class="p-3">Mada</th><th class="p-3">Visa</th><th class="p-3">Master</th><th class="p-3 text-black">Net Total</th><th class="p-3 text-center admin-only">Actions</th></tr>
+                                    <tr><th class="p-3">Date</th><th class="p-3">Station</th><th class="p-3">Mada (1%)</th><th class="p-3">Visa (2.75%)</th><th class="p-3">Master (2.75%)</th><th class="p-3 text-black">Net Total</th><th class="p-3 text-center admin-only">Actions</th></tr>
                                 </thead>
-                                <tbody id="tableBody" class="divide-y italic font-medium"></tbody>
+                                <tbody id="tableBody" class="divide-y divide-gray-100 italic font-medium"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <div id="taxInvoice" class="view-section">...</div>
-                <div id="tdsSummary" class="view-section">...</div>
-                <div id="shabakaData" class="view-section">...</div>
-                <div id="vatReport" class="view-section">...</div>
+                <div id="taxInvoice" class="view-section">
+                    <div class="content-box">
+                         <div class="flex justify-between items-center border-b pb-3 mb-4">
+                            <h2 class="text-lg font-black uppercase italic">Tax Invoice Generator</h2>
+                            <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded text-[10px] font-bold uppercase print-hidden">Print PDF</button>
+                        </div>
+                        <div id="invoicePrintArea" class="bg-white p-6 border rounded-lg">
+                            <h1 class="text-2xl font-black text-center text-blue-900 uppercase">Shar Petroleum</h1>
+                            <p class="text-xs text-center text-gray-400 mb-6 uppercase">VAT / Tax Invoice Summary</p>
+                            <table class="w-full text-left text-[11px] border">
+                                <thead class="bg-gray-100 uppercase font-bold text-[9px]">
+                                    <tr><th class="p-3 border-r">Date</th><th class="p-3 border-r">Station</th><th class="p-3 border-r">Gross</th><th class="p-3">Total VAT</th></tr>
+                                </thead>
+                                <tbody id="invoiceBody" class="divide-y"></tbody>
+                                <tfoot class="bg-blue-50 font-black text-[12px] border-t">
+                                    <tr><td colspan="2" class="p-3 text-right border-r uppercase">Grand Total:</td><td id="invGross" class="p-3 border-r text-blue-900">0.00</td><td id="invVat" class="p-3 text-green-700">0.00</td></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tdsSummary" class="view-section"><div class="content-box"><canvas id="vatChart"></canvas></div></div>
+                <div id="shabakaData" class="view-section"><div class="content-box"><h3 class="font-bold text-sm mb-4">Shabaka Today:</h3><div id="shabakaCards" class="grid grid-cols-3 gap-2 text-center"></div></div></div>
+                <div id="vatReport" class="view-section"><div class="content-box"><div id="vatTableArea"></div></div></div>
 
             </div>
         </div>
@@ -125,8 +154,8 @@
             <h2 id="modalTitle" class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">Record Entry</h2>
             <form id="dataForm" class="space-y-4">
                 <input type="hidden" id="editIndex">
-                <div><label class="text-[10px] font-bold text-slate-400">Date</label><input type="date" id="formDate" required class="w-full p-2 bg-gray-50 border rounded"></div>
-                <div><label class="text-[10px] font-bold text-slate-400">Station Name</label><input type="text" id="formStation" required class="w-full p-2 bg-gray-50 border rounded uppercase"></div>
+                <div><label class="text-[10px] font-bold text-slate-400">Date</label><input type="date" id="formDate" required class="w-full p-2 bg-gray-50 border rounded outline-none"></div>
+                <div><label class="text-[10px] font-bold text-slate-400">Station Name</label><input type="text" id="formStation" required class="w-full p-2 bg-gray-50 border rounded uppercase outline-none"></div>
                 <div class="grid grid-cols-3 gap-2">
                     <div><label class="text-[9px]">Mada</label><input type="number" step="any" id="formMada" class="w-full p-2 bg-gray-50 border rounded"></div>
                     <div><label class="text-[9px]">Visa</label><input type="number" step="any" id="formVisa" class="w-full p-2 bg-gray-50 border rounded"></div>
@@ -134,7 +163,7 @@
                 </div>
                 <div class="flex gap-2 mt-6">
                     <button type="button" onclick="closeModal()" class="flex-1 py-2 text-gray-400 font-bold uppercase text-[10px]">Cancel</button>
-                    <button type="submit" id="saveBtn" class="flex-1 py-2 bg-blue-600 text-white rounded font-bold uppercase text-[10px]">Save</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-2 bg-blue-600 text-white rounded font-bold uppercase text-[10px]">Save Data</button>
                 </div>
             </form>
         </div>
@@ -142,49 +171,47 @@
     
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUSfER5aUJT_HIzwZdGygH5A_8NRABKVl8vmsL47NLMqBNZjzcTSmci8e9qZq2R4zd/exec";
-        const MASTER_PIN = "4253"; // পিন এখন ৪২৫৩
+        
+        // --- SECURITY CONFIG ---
+        const ADMIN_PIN = "4253";   // আপনার পিন
+        const GUEST_PIN = "shar321"; // গেস্ট পিন
+        
         let isAdmin = false;
         let cachedData = [];
         let myVatChart = null;
 
-        function checkLogin(role) {
-            const pin = document.getElementById('adminPin').value;
-            if(role === 'admin') {
-                if(pin === MASTER_PIN) {
-                    isAdmin = true;
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    applyPermissions();
-                } else {
-                    document.getElementById('loginError').classList.remove('hidden');
-                }
-            } else {
+        // LOGIN SYSTEM
+        function handleLogin() {
+            const inputPin = document.getElementById('userPin').value;
+            const errorMsg = document.getElementById('loginError');
+
+            if (inputPin === ADMIN_PIN) {
+                isAdmin = true;
+                loginSuccess("ADMINISTRATOR");
+            } else if (inputPin === GUEST_PIN) {
                 isAdmin = false;
-                document.getElementById('loginOverlay').style.display = 'none';
-                applyPermissions();
+                loginSuccess("GUEST VIEW");
+            } else {
+                errorMsg.classList.remove('hidden');
+                document.getElementById('userPin').value = "";
             }
+        }
+
+        function loginSuccess(roleName) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+            document.getElementById('userRoleHeader').innerText = "Logged in as: " + roleName;
+            
+            // Apply restrictions
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                el.style.display = isAdmin ? (el.tagName === 'A' ? 'flex' : 'block') : 'none';
+            });
+            
             loadData();
         }
 
-        function applyPermissions() {
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                el.style.display = isAdmin ? 'block' : 'none';
-                if(el.tagName === 'A') el.style.display = isAdmin ? 'flex' : 'none';
-            });
-        }
-
-        // ... বাকি সব লজিক আগের মতোই কাজ করবে ...
-        function switchTab(tabId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('nav-link-active'));
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById('nav-' + tabId).classList.add('nav-link-active');
-            if(tabId === 'taxInvoice') generateInvoice();
-            if(tabId === 'tdsSummary') renderTDSChart();
-            if(tabId === 'shabakaData') renderShabaka();
-            if(tabId === 'vatReport') renderVatReport();
-        }
-
+        // --- DASHBOARD CORE ---
         function loadData() {
             const script = document.createElement('script');
             script.src = `${SCRIPT_URL}?callback=handleResponse`;
@@ -194,7 +221,6 @@
         function handleResponse(data) {
             cachedData = data.slice().reverse();
             populateDashboard();
-            populateStationDropdown();
         }
 
         function populateDashboard() {
@@ -204,6 +230,7 @@
             cachedData.forEach((row, index) => {
                 const actualIndex = cachedData.length - 1 - index;
                 const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
+                // VAT Calculation Logic (1% & 2.75%)
                 const vat = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
                 const gross = m + v + ms, net = gross - vat;
                 gT += gross; fT += vat; nT += net;
@@ -227,19 +254,20 @@
             document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
         }
 
+        // --- TAB NAVIGATION & OTHER VIEWS (REPORTS) ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('nav-link-active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('nav-' + tabId).classList.add('nav-link-active');
+            if(tabId === 'taxInvoice') generateInvoice();
+        }
+
         function generateInvoice() {
-            const station = document.getElementById('invoiceStation').value;
-            const type = document.getElementById('invoiceType').value;
             const body = document.getElementById('invoiceBody');
             body.innerHTML = "";
             let tg=0, tv=0;
-            const today = new Date().toISOString().split('T')[0];
             cachedData.forEach(row => {
-                const dStr = new Date(row.date).toISOString().split('T')[0];
-                if(station !== "ALL" && row.stationname.toUpperCase() !== station) return;
-                if(type === "DAILY" && dStr !== today) return;
-                if(type === "MONTHLY" && dStr.substring(0,7) !== today.substring(0,7)) return;
-
                 const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
                 const vat = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
                 tg += (m+v+ms); tv += vat;
@@ -249,76 +277,17 @@
             document.getElementById('invVat').innerText = tv.toFixed(2);
         }
 
-        function populateStationDropdown() {
-            const stations = [...new Set(cachedData.map(item => item.stationname.toUpperCase()))];
-            const select = document.getElementById('invoiceStation');
-            select.innerHTML = '<option value="ALL">All Stations</option>';
-            stations.forEach(st => { select.innerHTML += `<option value="${st}">${st}</option>`; });
-        }
-
-        function renderTDSChart() {
-            const stationVat = {};
-            cachedData.forEach(row => {
-                const st = row.stationname.toUpperCase();
-                const v = (parseFloat(row.mada||0)*0.01) + (parseFloat(row.visa||0)*0.0275) + (parseFloat(row.master||0)*0.0275);
-                stationVat[st] = (stationVat[st] || 0) + v;
-            });
-            if(myVatChart) myVatChart.destroy();
-            myVatChart = new Chart(document.getElementById('vatChart'), {
-                type: 'bar',
-                data: { labels: Object.keys(stationVat), datasets: [{ label: 'VAT Amount (SR)', data: Object.values(stationVat), backgroundColor: '#1e3a8a' }] }
-            });
-        }
-
-        function renderShabaka() {
-            const today = new Date().toISOString().split('T')[0];
-            let dM=0, dV=0, dMs=0, mM=0, mV=0, mMs=0;
-            cachedData.forEach(row => {
-                const dStr = new Date(row.date).toISOString().split('T')[0];
-                const m = parseFloat(row.mada||0), v = parseFloat(row.visa||0), ms = parseFloat(row.master||0);
-                if(dStr === today) { dM+=m; dV+=v; dMs+=ms; }
-                if(dStr.substring(0,7) === today.substring(0,7)) { mM+=m; mV+=v; mMs+=ms; }
-            });
-            document.getElementById('todayMada').innerText = dM.toFixed(2);
-            document.getElementById('todayVisa').innerText = dV.toFixed(2);
-            document.getElementById('todayMaster').innerText = dMs.toFixed(2);
-            document.getElementById('monthMada').innerText = mM.toFixed(2);
-            document.getElementById('monthVisa').innerText = mV.toFixed(2);
-            document.getElementById('monthMaster').innerText = mMs.toFixed(2);
-        }
-
-        function renderVatReport() {
-            const body = document.getElementById('vatReportBody');
-            body.innerHTML = "";
-            cachedData.forEach(row => {
-                const m = parseFloat(row.mada||0), v = parseFloat(row.visa||0), ms = parseFloat(row.master||0);
-                const vat = (m*0.01) + (v*0.0275) + (ms*0.0275);
-                body.innerHTML += `<tr><td class="p-3 border-r">${new Date(row.date).toLocaleDateString()}</td><td class="p-3 border-r font-bold">${row.stationname}</td><td class="p-3 border-r">${(m+v+ms-vat).toFixed(2)}</td><td class="p-3 font-bold text-green-700">${vat.toFixed(2)}</td></tr>`;
-            });
-        }
-
-        function editRow(idx) {
+        // --- ADMIN FUNCTIONS ---
+        function openModal() { 
             if(!isAdmin) return;
-            const r = cachedData.slice().reverse()[idx]; 
-            document.getElementById('editIndex').value = idx;
-            document.getElementById('formDate').value = new Date(r.date).toISOString().split('T')[0];
-            document.getElementById('formStation').value = r.stationname;
-            document.getElementById('formMada').value = r.mada;
-            document.getElementById('formVisa').value = r.visa;
-            document.getElementById('formMaster').value = r.master;
-            document.getElementById('modalTitle').innerText = "Edit Record";
-            document.getElementById('entryModal').classList.add('active');
+            document.getElementById('dataForm').reset();
+            document.getElementById('editIndex').value = "";
+            document.getElementById('entryModal').classList.add('active'); 
         }
-
-        async function deleteRow(idx) {
-            if(!isAdmin || !confirm("Delete this record?")) return;
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
-            setTimeout(() => { location.reload(); }, 1000);
-        }
-
+        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
+        
         document.getElementById('dataForm').onsubmit = async (e) => {
             e.preventDefault();
-            if(!isAdmin) return;
             const btn = document.getElementById('saveBtn');
             btn.innerText = "SAVING..."; btn.disabled = true;
             const payload = {
@@ -334,14 +303,12 @@
             setTimeout(() => { location.reload(); }, 1500);
         };
 
-        function openModal() { 
-            if(!isAdmin) return;
-            document.getElementById('dataForm').reset();
-            document.getElementById('editIndex').value = "";
-            document.getElementById('modalTitle').innerText = "New Record";
-            document.getElementById('entryModal').classList.add('active'); 
+        async function deleteRow(idx) {
+            if(!isAdmin || !confirm("Delete this entry?")) return;
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
+            setTimeout(() => { location.reload(); }, 1000);
         }
-        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
+
         function searchTable() {
             let input = document.getElementById("searchInput").value.toUpperCase();
             document.querySelectorAll("#tableBody tr").forEach(row => {
