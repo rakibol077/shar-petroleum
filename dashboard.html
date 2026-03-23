@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shar Petroleum - Analytics Dashboard</title>
+    <title>Shar Petroleum - Management & Reports</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -16,7 +15,6 @@
         .nav-item:hover { background: #eeefff; color: #6366f1; }
         .nav-active { background: #e0e2ff; color: #4f46e5; border-right: 4px solid #4f46e5; }
         .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .chart-container { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px; }
         #entryModal, #reportModal { display: none; }
         #entryModal.active, #reportModal.active { display: flex; }
         @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 15px; } }
@@ -26,22 +24,26 @@
 
     <div class="sidebar overflow-y-auto">
         <div class="p-6 flex flex-col items-center border-b mb-4">
-            <div class="w-16 h-16 bg-[#1e293b] rounded-full flex items-center justify-center mb-3 border-2 border-blue-500 shadow-lg"><i class="fas fa-burn text-orange-400 text-2xl"></i></div>
+            <div class="w-16 h-16 bg-[#1e293b] rounded-full flex items-center justify-center mb-3 border-2 border-blue-500 shadow-lg">
+                <i class="fas fa-burn text-orange-400 text-2xl"></i>
+            </div>
             <h2 class="text-[10px] font-bold text-slate-800 uppercase tracking-widest text-center">Shar Petroleum</h2>
         </div>
         <nav>
-            <a onclick="location.reload()" class="nav-item nav-active"><i class="fas fa-chart-pie"></i> Analytics</a>
+            <a onclick="location.reload()" class="nav-item nav-active"><i class="fas fa-th-large"></i> Dashboard</a>
             <a onclick="openModal()" class="nav-item"><i class="fas fa-plus-circle"></i> Data Entry</a>
-            <a onclick="openReportModal()" class="nav-item font-bold text-blue-600 bg-blue-50"><i class="fas fa-file-invoice"></i> Tax Invoice</a>
+            <a onclick="openReportModal()" class="nav-item font-bold text-blue-600 bg-blue-50"><i class="fas fa-file-invoice"></i> Tax Invoice & Reports</a>
+            <a class="nav-item"><i class="fas fa-chart-line"></i> Company Sales</a>
             <a class="nav-item"><i class="fas fa-gas-pump"></i> Station Report</a>
         </nav>
     </div>
 
     <div class="main-content">
         <header class="flex justify-between items-center mb-8">
-            <h1 class="text-lg font-black text-gray-800 uppercase italic">Sales Analytics</h1>
+            <h1 class="text-lg font-black text-gray-800 uppercase italic">Management Dashboard</h1>
             <div class="flex gap-2">
-                <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-[10px] font-bold shadow-lg uppercase hover:bg-blue-700 transition">New Record</button>
+                <button onclick="openReportModal()" class="bg-white border border-blue-600 text-blue-600 px-4 py-2 rounded-lg text-[10px] font-bold uppercase shadow-sm">Generate Report</button>
+                <button onclick="openModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-[10px] font-bold shadow-lg uppercase hover:bg-blue-700 transition"><i class="fas fa-plus mr-1"></i> New</button>
             </div>
         </header>
 
@@ -51,26 +53,91 @@
             <div class="stat-card border-b-4 border-green-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
         </div>
 
-        <div class="chart-container">
-            <h4 class="font-bold text-xs text-gray-700 uppercase mb-4 italic">7-Day Sales Trend (Gross)</h4>
-            <canvas id="salesChart" height="100"></canvas>
-        </div>
-
         <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div class="p-4 bg-gray-50 border-b"><h4 class="font-bold text-xs text-gray-700 uppercase italic">Recent Transactions</h4></div>
+            <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+                <h4 class="font-bold text-xs text-gray-700 uppercase italic">Recent Transactions</h4>
+            </div>
             <table class="w-full text-left text-[11px] font-medium">
                 <thead class="bg-gray-100 text-gray-500 uppercase text-[9px]">
-                    <tr><th class="p-4">Date</th><th class="p-4">Station</th><th class="p-4">Mada</th><th class="p-4 text-slate-900 font-black">Net Total</th><th class="p-4 text-center">Actions</th></tr>
+                    <tr>
+                        <th class="p-4">Date</th>
+                        <th class="p-4">Station Name</th>
+                        <th class="p-4 text-blue-600">Mada</th>
+                        <th class="p-4">Visa</th>
+                        <th class="p-4">Master</th>
+                        <th class="p-4 font-black text-slate-900">Net Total</th>
+                        <th class="p-4 text-center">Actions</th>
+                    </tr>
                 </thead>
                 <tbody id="tableBody" class="divide-y divide-gray-50"></tbody>
             </table>
         </div>
     </div>
 
+    <div id="reportModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center border-b pb-4 mb-6">
+                <h2 class="text-lg font-black uppercase italic text-blue-900">Tax Invoice / Reports</h2>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <div class="md:col-span-2">
+                    <label class="text-[9px] font-bold text-blue-600 uppercase">Select Month (Monthly Report)</label>
+                    <input type="month" id="reportMonth" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold text-blue-600 uppercase">Specific Day</label>
+                    <input type="date" id="reportDay" onchange="generateReport()" class="w-full p-2 bg-white rounded border border-blue-200 outline-none">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="window.print()" class="w-full bg-blue-600 text-white p-2 rounded font-bold text-[10px] uppercase shadow-md hover:bg-blue-700 transition"><i class="fas fa-print mr-1"></i> Print</button>
+                </div>
+            </div>
+
+            <div class="overflow-y-auto flex-1 border rounded-lg">
+                <table class="w-full text-left text-[11px]">
+                    <thead class="bg-blue-900 text-white uppercase text-[9px] sticky top-0">
+                        <tr>
+                            <th class="p-3">Date</th>
+                            <th class="p-3">Station</th>
+                            <th class="p-3">Gross</th>
+                            <th class="p-3">VAT (15%)</th>
+                            <th class="p-3 font-bold">Net Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="divide-y divide-gray-100 italic"></tbody>
+                    <tfoot class="bg-slate-50 font-black">
+                        <tr id="reportFooter"></tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="entryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-sm shadow-2xl">
+            <h2 id="modalTitle" class="text-lg font-black mb-6 uppercase italic text-blue-900 border-b pb-2">Record Entry</h2>
+            <form id="dataForm" class="space-y-4">
+                <input type="hidden" id="editIndex">
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Date</label><input type="date" id="formDate" required class="w-full p-3 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-blue-400"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Station Name</label><input type="text" id="formStation" placeholder="STATION NAME" required class="w-full p-3 bg-gray-50 rounded-lg outline-none uppercase"></div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div><label class="text-[9px] font-bold text-blue-600">Mada</label><input type="number" step="any" id="formMada" placeholder="0.00" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                    <div><label class="text-[9px] font-bold text-slate-600">Visa</label><input type="number" step="any" id="formVisa" placeholder="0.00" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                    <div><label class="text-[9px] font-bold text-orange-400">Master</label><input type="number" step="any" id="formMaster" placeholder="0.00" class="w-full p-2 bg-gray-50 rounded-lg outline-none"></div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-[10px]">Cancel</button>
+                    <button type="submit" id="saveBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold uppercase text-[10px] shadow-lg">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtkGvsL_IaxaKvJ2a8pIq_rxaKxBtC04Z6-g2s5kcfXeHlzc_Fw6BHLoCs9BmKo8G8/exec";
         let cachedData = [];
-        let myChart;
 
         async function loadData() {
             try {
@@ -78,7 +145,6 @@
                 const data = await res.json();
                 cachedData = data;
                 renderTable(data);
-                updateChart(data); // চার্ট আপডেট করার জন্য
             } catch(e) { console.error("Error!"); }
         }
 
@@ -86,19 +152,24 @@
             const body = document.getElementById('tableBody');
             body.innerHTML = "";
             let gT=0, vT=0, nT=0;
+
             data.slice().reverse().forEach((row, index) => {
                 const actualIndex = data.length - 1 - index;
                 const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
                 const gross = m + v + ms, net = gross / 1.15, vat = gross - net;
                 gT += gross; vT += vat; nT += net;
+
                 body.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition">
                         <td class="p-4 text-gray-400 font-medium">${new Date(row.date).toLocaleDateString()}</td>
                         <td class="p-4 font-black text-slate-800 uppercase italic">${row.stationname || "N/A"}</td>
                         <td class="p-4 text-blue-600 font-bold">${m.toFixed(2)}</td>
+                        <td class="p-4 text-slate-500">${v.toFixed(2)}</td>
+                        <td class="p-4 text-orange-400">${ms.toFixed(2)}</td>
                         <td class="p-4 font-black text-slate-900">${net.toFixed(2)}</td>
                         <td class="p-4 flex justify-center gap-3">
-                            <button onclick="openModal(${actualIndex})" class="text-blue-500"><i class="fas fa-edit"></i></button>
+                            <button onclick="openModal(${actualIndex})" class="text-blue-500 hover:scale-110"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteRow(${actualIndex})" class="text-red-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
@@ -107,39 +178,95 @@
             document.getElementById('totalNet').innerText = nT.toFixed(2) + " SR";
         }
 
-        // --- CHART LOGIC ---
-        function updateChart(data) {
-            const last7Days = data.slice(-7);
-            const labels = last7Days.map(d => new Date(d.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}));
-            const salesValues = last7Days.map(d => (parseFloat(d.mada || 0) + parseFloat(d.visa || 0) + parseFloat(d.master || 0)));
+        // --- REPORT LOGIC ---
+        function generateReport() {
+            const monthVal = document.getElementById('reportMonth').value; // YYYY-MM
+            const dayVal = document.getElementById('reportDay').value; // YYYY-MM-DD
+            const reportTable = document.getElementById('reportTableBody');
+            const footer = document.getElementById('reportFooter');
+            
+            reportTable.innerHTML = "";
+            let rGross=0, rVat=0, rNet=0;
 
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            if(myChart) myChart.destroy(); // পুরনো চার্ট রিমুভ করা
+            cachedData.forEach(row => {
+                const rowDateObj = new Date(row.date);
+                const rowMonth = rowDateObj.toISOString().substring(0, 7);
+                const rowDay = rowDateObj.toISOString().substring(0, 10);
 
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Gross Sales (SR)',
-                        data: salesValues,
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#4f46e5'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
+                let match = false;
+                if (dayVal && rowDay === dayVal) match = true;
+                else if (monthVal && rowMonth === monthVal && !dayVal) match = true;
+
+                if (match) {
+                    const m = parseFloat(row.mada || 0), v = parseFloat(row.visa || 0), ms = parseFloat(row.master || 0);
+                    const gross = m+v+ms, net = gross/1.15, vat = gross-net;
+                    rGross += gross; rVat += vat; rNet += net;
+
+                    reportTable.innerHTML += `
+                        <tr class="text-slate-700">
+                            <td class="p-3">${rowDay}</td>
+                            <td class="p-3 uppercase font-bold text-blue-900">${row.stationname}</td>
+                            <td class="p-3">${gross.toFixed(2)}</td>
+                            <td class="p-3 text-red-500">${vat.toFixed(2)}</td>
+                            <td class="p-3 font-bold text-slate-900">${net.toFixed(2)}</td>
+                        </tr>`;
                 }
             });
+
+            footer.innerHTML = `
+                <td colspan="2" class="p-3 text-right">TOTALS:</td>
+                <td class="p-3 text-blue-900">${rGross.toFixed(2)}</td>
+                <td class="p-3 text-red-500">${rVat.toFixed(2)}</td>
+                <td class="p-3 text-green-700">${rNet.toFixed(2)}</td>`;
         }
 
-        // বাকি ফাংশনগুলো (openModal, closeModal, etc.) আগের মতোই থাকবে।
+        // --- MODAL & FORM HELPERS ---
+        function openReportModal() { document.getElementById('reportModal').classList.add('active'); }
+        function closeReportModal() { document.getElementById('reportModal').classList.remove('active'); }
+        
+        document.getElementById('dataForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const editIdx = document.getElementById('editIndex').value;
+            btn.innerText = "Saving..."; btn.disabled = true;
+
+            const payload = {
+                date: document.getElementById('formDate').value,
+                stationName: document.getElementById('formStation').value.toUpperCase(),
+                mada: Number(document.getElementById('formMada').value) || 0,
+                visa: Number(document.getElementById('formVisa').value) || 0,
+                master: Number(document.getElementById('formMaster').value) || 0,
+                action: editIdx === "" ? "add" : "edit",
+                index: editIdx
+            };
+
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
+            setTimeout(() => { closeModal(); loadData(); btn.innerText = "Save Record"; btn.disabled = false; }, 1500);
+        };
+
+        async function deleteRow(idx) {
+            if(!confirm("Are you sure?")) return;
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ index: idx, action: "delete" }), mode: 'no-cors' });
+            setTimeout(loadData, 1000);
+        }
+
+        function openModal(idx = null) {
+            const modal = document.getElementById('entryModal');
+            modal.classList.add('active');
+            if(idx !== null) {
+                const r = cachedData[idx];
+                document.getElementById('modalTitle').innerText = "Edit Record";
+                document.getElementById('editIndex').value = idx;
+                if(r.date) document.getElementById('formDate').value = new Date(r.date).toISOString().split('T')[0];
+                document.getElementById('formStation').value = r.stationname || "";
+                document.getElementById('formMada').value = r.mada || 0; document.getElementById('formVisa').value = r.visa || 0; document.getElementById('formMaster').value = r.master || 0;
+            } else {
+                document.getElementById('modalTitle').innerText = "New Record";
+                document.getElementById('dataForm').reset();
+                document.getElementById('editIndex').value = "";
+            }
+        }
+        function closeModal() { document.getElementById('entryModal').classList.remove('active'); }
         window.onload = loadData;
     </script>
 </body>
