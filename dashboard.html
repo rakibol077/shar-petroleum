@@ -50,9 +50,18 @@
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="stat-card border-b-4 border-blue-600 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Gross</p><h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-red-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Bank Fee (VAT)</p><h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3></div>
-            <div class="stat-card border-b-4 border-green-500 text-center"><p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net Sales</p><h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3></div>
+            <div class="stat-card border-b-4 border-blue-600 text-center">
+                <p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Gross</p>
+                <h3 id="totalGross" class="text-xl font-black text-blue-900">0.00 SR</h3>
+            </div>
+            <div class="stat-card border-b-4 border-red-500 text-center">
+                <p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Bank Fee (VAT)</p>
+                <h3 id="totalVat" class="text-xl font-black text-red-500">0.00 SR</h3>
+            </div>
+            <div class="stat-card border-b-4 border-green-500 text-center">
+                <p class="text-gray-400 text-[10px] font-bold uppercase mb-1 italic">Total Net Sales</p>
+                <h3 id="totalNet" class="text-xl font-black text-green-600">0.00 SR</h3>
+            </div>
         </div>
 
         <div class="chart-card">
@@ -154,7 +163,7 @@
                 cachedData = data;
                 renderTable(data);
                 renderChart(data);
-            } catch(e) { console.error("Error!"); }
+            } catch(e) { console.error("Error loading data!"); }
         }
 
         function renderTable(data) {
@@ -168,16 +177,16 @@
                 const v = parseFloat(row.visa || 0);
                 const ms = parseFloat(row.master || 0);
 
-                // New logic: Mada 1%, Visa 2.75%, Master 2.75%
-                const madaVat = m * 0.01;
-                const visaVat = v * 0.0275;
-                const masterVat = ms * 0.0275;
+                // সঠিক ক্যালকুলেশন লজিক
+                const madaFee = m * 0.01;      // 1%
+                const visaFee = v * 0.0275;    // 2.75%
+                const masterFee = ms * 0.0275;  // 2.75%
 
                 const gross = m + v + ms;
-                const vatTotal = madaVat + visaVat + masterVat;
-                const net = gross - vatTotal;
+                const totalFee = madaFee + visaFee + masterFee;
+                const net = gross - totalFee;
 
-                gT += gross; vT += vatTotal; nT += net;
+                gT += gross; vT += totalFee; nT += net;
 
                 body.innerHTML += `
                     <tr class="hover:bg-blue-50/30 transition border-b">
@@ -250,16 +259,12 @@
                     const v = parseFloat(row.visa || 0);
                     const ms = parseFloat(row.master || 0);
 
-                    const madaV = m * 0.01;
-                    const visaV = v * 0.0275;
-                    const masterV = ms * 0.0275;
+                    const fee = (m * 0.01) + (v * 0.0275) + (ms * 0.0275);
+                    const gross = m + v + ms;
+                    const net = gross - fee;
 
-                    const gross = m+v+ms;
-                    const vat = madaV + visaV + masterV;
-                    const net = gross - vat;
-
-                    rGross += gross; rVat += vat; rNet += net;
-                    reportTable.innerHTML += `<tr><td class="p-3">${rowDay}</td><td class="p-3 uppercase font-bold">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${vat.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
+                    rGross += gross; rVat += fee; rNet += net;
+                    reportTable.innerHTML += `<tr><td class="p-3">${rowDay}</td><td class="p-3 uppercase font-bold">${row.stationname}</td><td class="p-3">${gross.toFixed(2)}</td><td class="p-3 text-red-500">${fee.toFixed(2)}</td><td class="p-3 font-bold">${net.toFixed(2)}</td></tr>`;
                 }
             });
             footer.innerHTML = `<td colspan="2" class="p-3 text-right font-black">TOTALS:</td><td class="p-3 text-blue-900">${rGross.toFixed(2)}</td><td class="p-3 text-red-500">${rVat.toFixed(2)}</td><td class="p-3 text-green-700">${rNet.toFixed(2)}</td>`;
