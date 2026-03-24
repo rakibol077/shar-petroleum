@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <meta name="google-site-verification" content="TxelCWoKB2XiwOUKZBjKqKTk-_JZFMzYfbqD1yC-1lM" />
+    <meta name="google-site-verification" content="tYRoNQvLp54jEN1bM-BMcLFICqdUtTk33YerX2im1zA" />
     
     <title>Shar Petroleum - Management System</title>
-    <meta name="description" content="Official management system for Shar Petroleum. Track daily sales, tax invoices, and VAT reports securely.">
+    <meta name="description" content="Official management system for Shar Petroleum. Track daily sales and reports.">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,7 +26,7 @@
 
     <div id="loginOverlay" class="fixed inset-0 bg-[#0f172a] z-[3000] flex items-center justify-center p-6">
         <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-[380px] text-center">
-            <h1 class="text-2xl font-black text-slate-800 italic mb-8 uppercase tracking-widest">Shar Petroleum</h1>
+            <h1 class="text-2xl font-black text-slate-800 italic mb-8 uppercase tracking-widest text-blue-600">Shar Petroleum</h1>
             <input type="password" id="userPin" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center text-3xl font-bold mb-6 outline-none border-2 focus:border-blue-500">
             <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700 uppercase tracking-widest">Login</button>
         </div>
@@ -37,26 +37,26 @@
             <h2 class="font-black text-blue-600 italic text-xl uppercase mb-10">Shar Petroleum</h2>
             <nav class="flex-1 space-y-2">
                 <div onclick="switchPage('dashboard', this)" class="sidebar-link active"><i class="fas fa-th-large w-6"></i> Dashboard</div>
-                <div onclick="switchPage('entry', this)" class="sidebar-link"><i class="fas fa-plus-circle w-6"></i> Master Data Entry</div>
+                <div onclick="switchPage('entry', this)" class="sidebar-link"><i class="fas fa-plus-circle w-6"></i> Data Entry</div>
                 <div onclick="switchPage('tax', this)" class="sidebar-link"><i class="fas fa-file-invoice w-6"></i> Tax Invoice</div>
                 <div onclick="switchPage('vat', this)" class="sidebar-link"><i class="fas fa-receipt w-6"></i> VAT Report</div>
             </nav>
-            <button onclick="location.reload()" class="text-red-500 font-bold p-4 hover:bg-red-50 rounded-2xl text-left"><i class="fas fa-sign-out-alt mr-2"></i> Logout</button>
+            <button onclick="location.reload()" class="text-red-500 font-bold p-4 hover:bg-red-50 rounded-2xl text-left mt-auto"><i class="fas fa-sign-out-alt mr-2"></i> Logout</button>
         </aside>
 
         <main class="flex-1 overflow-auto p-10">
             <div id="dashboard" class="page active">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div class="stat-card bg-blue-600 text-white shadow-xl">
-                        <p class="text-[10px] font-bold uppercase opacity-80">Total Gross</p>
+                        <p class="text-[10px] font-bold uppercase opacity-80 mb-1">Total Gross</p>
                         <h3 id="totalGross" class="text-3xl font-black">Loading...</h3>
                     </div>
-                    <div class="stat-card bg-white border-b-8 border-red-500">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Bank Fees (1.1%)</p>
+                    <div class="stat-card bg-white border-b-8 border-red-500 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Bank Fees (1.1%)</p>
                         <h3 id="totalFees" class="text-3xl font-black text-red-500">0.00 SR</h3>
                     </div>
-                    <div class="stat-card bg-white border-b-8 border-green-500">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Net Income</p>
+                    <div class="stat-card bg-white border-b-8 border-green-500 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Net Income</p>
                         <h3 id="netIncome" class="text-3xl font-black text-green-600">0.00 SR</h3>
                     </div>
                 </div>
@@ -69,22 +69,23 @@
                                 <th class="p-6">Station</th>
                                 <th class="p-6 text-blue-600">Mada</th>
                                 <th class="p-6 text-red-500">Visa</th>
-                                <th class="p-6">Total</th>
+                                <th class="p-6">Net Total</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody" class="text-sm font-bold text-slate-700"></tbody>
+                        <tbody id="tableBody" class="text-sm font-bold text-slate-700">
+                            </tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="entry" class="page py-20 text-center font-black text-slate-300">Data Entry Mode</div>
-            <div id="tax" class="page py-20 text-center font-black text-slate-300">Tax Invoice Report</div>
-            <div id="vat" class="page py-20 text-center font-black text-slate-300">VAT Summary 15%</div>
+            <div id="entry" class="page py-20 text-center font-black text-slate-300 uppercase italic">Data Entry Screen</div>
+            <div id="tax" class="page py-20 text-center font-black text-slate-300 uppercase italic">Tax Invoice Generator</div>
+            <div id="vat" class="page py-20 text-center font-black text-slate-300 uppercase italic">VAT Summary Report</div>
         </main>
     </div>
 
     <script>
-        // আপনার Google Apps Script এর আসল URL এখানে দিন
+        // আপনার গুগল অ্যাপস স্ক্রিপ্টের URL এখানে দিন
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfyc... আপনার লিঙ্ক .../exec";
 
         function handleLogin() {
@@ -108,7 +109,10 @@
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
                 renderTable(data);
-            } catch (e) { console.log(e); }
+            } catch (e) { 
+                console.log(e); 
+                document.getElementById('totalGross').innerText = "Error Loading";
+            }
         }
 
         function renderTable(data) {
@@ -116,13 +120,14 @@
             for (let i = 1; i < data.length; i++) {
                 let m = parseFloat(data[i][2]) || 0;
                 let v = parseFloat(data[i][3]) || 0;
-                let net = m + v; total += net;
-                html += `<tr class="border-b">
-                    <td class="p-6 text-slate-400">${data[i][0]}</td>
-                    <td class="p-6 font-black uppercase">${data[i][1]}</td>
+                let net = m + v;
+                total += net;
+                html += `<tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-6 text-slate-400 font-medium">${data[i][0]}</td>
+                    <td class="p-6 font-black uppercase text-slate-800">${data[i][1]}</td>
                     <td class="p-6 text-blue-600">${m.toFixed(2)}</td>
                     <td class="p-6 text-red-500">${v.toFixed(2)}</td>
-                    <td class="p-6 font-black">${net.toFixed(2)} SR</td>
+                    <td class="p-6 font-black text-slate-900">${net.toFixed(2)} SR</td>
                 </tr>`;
             }
             document.getElementById('tableBody').innerHTML = html;
