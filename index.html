@@ -147,7 +147,7 @@
                             <div><label class="text-[10px] font-bold text-slate-400">Date</label><input type="date" id="trDate" required class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs"></div>
                             <div><label class="text-[10px] font-bold text-slate-400">Amount (SR)</label><input type="number" id="trAmount" step="any" required class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs"></div>
                             <div><label class="text-[10px] font-bold text-slate-400">Note</label><input type="text" id="trNote" placeholder="e.g. Bank Transfer" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs"></div>
-                            <button type="submit" id="trSubmitBtn" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold">SUBMIT TRANSFER</button>
+                            <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold">SUBMIT TRANSFER</button>
                         </form>
                     </div>
                     <div class="card lg:col-span-2">
@@ -188,8 +188,7 @@
     </div>
 
     <script>
-        // আপনার দেওয়া নতুন লিঙ্ক এখানে বসানো হয়েছে
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8dvxUr1DXHIMivPtwqJYkvj6Y6wVgk_XpVRBLk6e2Ox34r2RJK2i89H7bKhKc2zsF/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUSfER5aUJT_HIzwZdGygH5A_8NRABKVl8vmsL47NLMqBNZjzcTSmci8e9qZq2R4zd/exec";
         const ADMIN_PIN = "4253";
         const GUEST_PIN = "shar321";
         
@@ -224,6 +223,7 @@
             document.getElementById('mainApp').style.setProperty('display', 'flex', 'important'); 
             document.getElementById('roleText').innerText = role;
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'block' : 'none');
+            // Special handling for table cells and flex buttons
             document.querySelectorAll('td.admin-only, th.admin-only').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
             if(isAdmin) document.getElementById('adminBtn').style.display = 'flex';
             loadData();
@@ -246,67 +246,6 @@
             updateTransferUI();
         }
 
-        // মাস্টার ডাটা সাবমিশন (মেইন শীটে)
-        document.getElementById('dataForm').onsubmit = function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "SAVING...";
-            btn.disabled = true;
-
-            const payload = {
-                date: document.getElementById('fDate').value,
-                stationname: document.getElementById('fStation').value,
-                mada: document.getElementById('fMada').value,
-                visa: document.getElementById('fVisa').value,
-                master: document.getElementById('fMaster').value,
-                type: "master"
-            };
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(payload)
-            }).then(() => {
-                alert("Data saved to Google Sheets!");
-                closeModal();
-                btn.innerText = "SAVE DATA";
-                btn.disabled = false;
-                loadData();
-            });
-        };
-
-        // ট্রান্সফার সাবমিশন (ট্রান্সফার শীটে)
-        document.getElementById('transferForm').onsubmit = (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('trSubmitBtn');
-            btn.innerText = "SENDING...";
-            btn.disabled = true;
-
-            const newTransfer = {
-                type: "transfer",
-                date: document.getElementById('trDate').value,
-                amount: document.getElementById('trAmount').value,
-                note: document.getElementById('trNote').value
-            };
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(newTransfer)
-            }).then(() => {
-                // Local copy for instant UI update
-                transferData.push({...newTransfer, id: Date.now()});
-                localStorage.setItem('shar_transfers', JSON.stringify(transferData));
-                
-                document.getElementById('transferForm').reset();
-                btn.innerText = "SUBMIT TRANSFER";
-                btn.disabled = false;
-                updateTransferUI();
-                populateDashboard();
-                alert("Transfer recorded successfully!");
-            });
-        };
-
         function populateDashboard() {
             const body = document.getElementById('dashBody');
             const searchQuery = document.getElementById('globalSearch').value.toUpperCase();
@@ -328,11 +267,13 @@
                         <td class="p-4 font-black uppercase text-blue-500">${row.stationname}</td>
                         <td class="p-4 font-black">${net.toFixed(2)}</td>
                         <td class="p-4 admin-only print-hidden" style="display: ${isAdmin?'table-cell':'none'}">
-                            <button class="text-blue-500 mr-2 opacity-50"><i class="fas fa-edit"></i></button>
+                            <button onclick="editRow(${row.originalIndex})" class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteRow(${row.originalIndex})" class="text-red-400"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
 
+            // Subtract transfers from Net Income
             let totalTransfers = transferData.reduce((sum, item) => sum + parseFloat(item.amount), 0);
             let finalNet = tn - totalTransfers;
 
@@ -340,6 +281,22 @@
             document.getElementById('dashVat').innerText = tv.toFixed(2) + " SR";
             document.getElementById('dashNet').innerText = finalNet.toFixed(2) + " SR";
         }
+
+        // --- Transfer Functionality ---
+        document.getElementById('transferForm').onsubmit = (e) => {
+            e.preventDefault();
+            const newTransfer = {
+                id: Date.now(),
+                date: document.getElementById('trDate').value,
+                amount: document.getElementById('trAmount').value,
+                note: document.getElementById('trNote').value
+            };
+            transferData.push(newTransfer);
+            localStorage.setItem('shar_transfers', JSON.stringify(transferData));
+            document.getElementById('transferForm').reset();
+            updateTransferUI();
+            populateDashboard();
+        };
 
         function updateTransferUI() {
             const body = document.getElementById('transferHistoryBody');
@@ -364,13 +321,14 @@
         }
 
         function deleteTransfer(id) {
-            if(!confirm("Delete this local transfer record?")) return;
+            if(!confirm("Delete this transfer record?")) return;
             transferData = transferData.filter(t => t.id !== id);
             localStorage.setItem('shar_transfers', JSON.stringify(transferData));
             updateTransferUI();
             populateDashboard();
         }
 
+        // --- Existing Functions ---
         function renderProfitChart() {
             const stationData = {};
             cachedData.forEach(r => {
@@ -407,11 +365,15 @@
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('nav-link-active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('nav-' + id).classList.add('nav-link-active');
+            if(id === 'taxInvoice') generateTaxInvoice();
         }
 
         function openModal() { 
             document.getElementById('entryModal').classList.remove('hidden'); 
             document.getElementById('entryModal').classList.add('flex'); 
+            document.getElementById('modalTitle').innerText = "Data Entry Form";
+            document.getElementById('dataForm').reset();
+            document.getElementById('editIndex').value = "";
         }
         function closeModal() { document.getElementById('entryModal').classList.add('hidden'); }
         function logout() { sessionStorage.clear(); location.reload(); }
@@ -513,6 +475,46 @@
                 body.innerHTML += `<tr><td class="p-3 border border-slate-700/20">${rDate}</td><td class="p-3 border border-slate-700/20 uppercase">${row.stationname}</td><td class="p-3 border border-slate-700/20 text-center">${(m+v+ms-vat).toFixed(2)}</td><td class="p-3 border border-slate-700/20 text-center text-red-600">${vat.toFixed(2)}</td></tr>`;
             });
         }
+
+        async function deleteRow(index) {
+            if(!isAdmin) return;
+            if(!confirm("Are you sure you want to delete this record?")) return;
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action: "delete", index: index}), mode: 'no-cors' });
+            setTimeout(() => location.reload(), 1500);
+        }
+
+        function editRow(index) {
+            if(!isAdmin) return;
+            const row = cachedData.find(r => r.originalIndex === index);
+            document.getElementById('fDate').value = new Date(row.date).toISOString().split('T')[0];
+            document.getElementById('fStation').value = row.stationname;
+            document.getElementById('fMada').value = row.mada;
+            document.getElementById('fVisa').value = row.visa;
+            document.getElementById('fMaster').value = row.master;
+            document.getElementById('editIndex').value = index;
+            document.getElementById('modalTitle').innerText = "Edit Record";
+            openModal();
+        }
+
+        document.getElementById('dataForm').onsubmit = async (e) => {
+            e.preventDefault();
+            if(!isAdmin) return;
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "SAVING..."; btn.disabled = true;
+            const payload = {
+                date: document.getElementById('fDate').value,
+                stationName: document.getElementById('fStation').value.toUpperCase(),
+                mada: Number(document.getElementById('fMada').value)||0,
+                visa: Number(document.getElementById('fVisa').value)||0,
+                master: Number(document.getElementById('fMaster').value)||0,
+                action: document.getElementById('editIndex').value === "" ? "add" : "edit",
+                index: document.getElementById('editIndex').value
+            };
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
+            setTimeout(() => location.reload(), 1000);
+        };
     </script>
 </body>
 </html>
